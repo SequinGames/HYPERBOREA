@@ -6,6 +6,7 @@ You will need the `vbo` directory to run the game, it's included in the [release
 ## https://snapcraft.io/publisher/sequin
 ## https://store.steampowered.com/app/3290500/Hyperborea/
 ## https://github.com/SequinGames?tab=repositories
+## https://www.perkristian.net/game_doom-sfx.shtml
 
 ```
 It's meant to be a modern taken on the game
@@ -56,5 +57,4 @@ made complete sense to also include Kristians sounds!
 Check out Kristians website for more information about
 how he remade these remarkable sound effects from scratch,
 audio reverse engineering at it's finest!
-https://www.perkristian.net/game_doom-sfx.shtml
 ```
