@@ -1,6 +1,8 @@
 #ifndef AUX_H
 #define AUX_H 
-#include "rply.h"
+#ifdef RPLY
+    #include "rply.h"
+#endif
 GLint projection_id;
 GLint modelview_id;
 GLint position_id;
@@ -188,7 +190,6 @@ void esDebug(const GLuint state)
 #endif
 #ifdef MAX_MODELS
     ESModel esModelArray[MAX_MODELS] = {0};
-    uint esModelArray_index = 0;
     uint esBoundModel = 0;
     void esBindModel(const uint id)
     {
@@ -218,9 +219,10 @@ void esDebug(const GLuint state)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, esModelArray[id].iid);
         glDrawElements(GL_TRIANGLES, esModelArray[id].ni, GL_UNSIGNED_INT, 0);
     }
-    #define MAX_MODEL_SIZE 8388608
+    #define MAX_MODEL_SIZE 5767168
     GLfloat vertex_buffer[MAX_MODEL_SIZE];
     GLuint index_buffer[MAX_MODEL_SIZE];
+#ifdef RPLY
     uint vbl = 0, ibl = 0;
     uint ntris = 0, nverts = 0;
     static int vertex_cb(p_ply_argument argument)
@@ -246,22 +248,16 @@ void esDebug(const GLuint state)
         }
         return 1;
     }
-    void unloadModel(const uint id)
-    {
-        esUnbind(&esModelArray[id].vid);
-        esUnbind(&esModelArray[id].iid);
-    }
-    int loadModel(const char* model_name)
+    int loadModel(const char* model_name, const uint id)
     {
         vbl = 0, ibl = 0;
         char fp[384];
         sprintf(fp, "ply/%s.ply", model_name);
         p_ply ply = ply_open(fp, NULL, 0, NULL);
-        if(!ply){esModelArray_index++; return -1;}
+        if(!ply){return -1;}
         if(!ply_read_header(ply))
         {
             ply_close(ply);
-            esModelArray_index++;
             return -1;
         }
         nverts = ply_set_read_cb(ply, "vertex", "x", vertex_cb, NULL, 0);
@@ -277,19 +273,72 @@ void esDebug(const GLuint state)
         if(!ply_read(ply))
         {
             ply_close(ply);
-            esModelArray_index++;
             return -1;
         }
         ply_close(ply);
-        esBind(GL_ARRAY_BUFFER, &esModelArray[esModelArray_index].vid, vertex_buffer, vbl*sizeof(GLfloat), GL_STATIC_DRAW);
-        esBind(GL_ELEMENT_ARRAY_BUFFER, &esModelArray[esModelArray_index].iid, index_buffer, ibl*sizeof(GLuint), GL_STATIC_DRAW);
-        esModelArray[esModelArray_index].ni = ibl;
-#ifdef TEST
-        printf("Loaded PLY: %u %u %u\n", esModelArray_index+1, vbl, ibl);
+#ifdef EXPORT_VBO
+        char path[256];
+        sprintf(path, "vbo/%s.v", model_name);
+        FILE* f = fopen(path, "wb");
+        if(f != NULL)
+        {
+            fwrite(vertex_buffer, vbl*sizeof(GLfloat), 1, f);
+            fclose(f);
+        }
+        sprintf(path, "vbo/%s.i", model_name);
+        f = fopen(path, "wb");
+        if(f != NULL)
+        {
+            fwrite(index_buffer, ibl*sizeof(GLuint), 1, f);
+            fclose(f);
+        }
 #endif
-        esModelArray_index++;
-        return esModelArray_index-1;
+        esBind(GL_ARRAY_BUFFER, &esModelArray[id].vid, vertex_buffer, vbl*sizeof(GLfloat), GL_STATIC_DRAW);
+        esBind(GL_ELEMENT_ARRAY_BUFFER, &esModelArray[id].iid, index_buffer, ibl*sizeof(GLuint), GL_STATIC_DRAW);
+        esModelArray[id].ni = ibl;
+#ifdef TEST
+        printf("Loaded PLY: %u %u %u\n", id, vbl, ibl);
+#endif
+        return id;
     }
+#else
+    int loadModel(const char* model_name, const uint id)
+    {
+        long vbl, ibl;
+        char path[256];
+        sprintf(path, "vbo/%s.v", model_name);
+        FILE* f = fopen(path, "rb");
+        if(f != NULL)
+        {
+            fseek(f, 0, SEEK_END);
+            vbl = ftell(f);
+            rewind(f);
+            fread(vertex_buffer, vbl, 1, f);
+            fclose(f);
+        }
+        sprintf(path, "vbo/%s.i", model_name);
+        f = fopen(path, "rb");
+        if(f != NULL)
+        {
+            fseek(f, 0, SEEK_END);
+            ibl = ftell(f);
+            esModelArray[id].ni = ibl/sizeof(GLuint);
+            rewind(f);
+            fread(index_buffer, ibl, 1, f);
+            fclose(f);
+        }
+        esBind(GL_ARRAY_BUFFER, &esModelArray[id].vid, vertex_buffer, vbl, GL_STATIC_DRAW);
+        esBind(GL_ELEMENT_ARRAY_BUFFER, &esModelArray[id].iid, index_buffer, ibl, GL_STATIC_DRAW);
+#ifdef TEST
+        printf("Loaded PLY: %u %u %u\n", id, vbl, ibl);
+#endif
+    }
+#endif
+void unloadModel(const uint id)
+{
+    esUnbind(&esModelArray[id].vid);
+    esUnbind(&esModelArray[id].iid);
+}
 #endif
 const GLchar* v0 =
     "#version 100\n"

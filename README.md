@@ -1,6 +1,4 @@
-*oh no not my top secret super secret elite propriatary codez laekd for free as MIt!!1! bYE ME oMg THaATS ISnNAanNENENEN OMFGG FOMGMGom*
-
-You will need the `/ply` directory to run the game, it's included in the [release build here](https://github.com/SequinGames/Hyperborea/releases/tag/V1).
+You will need the `vbo` directory to run the game, it's included in the [release build here](https://github.com/SequinGames/Hyperborea/releases/tag/V2).
 
 ![Screenshot](https://github.com/SequinGames/Hyperborea/blob/%E1%95%95(-%E1%90%9B-)%E1%95%97/screenshot.png?raw=true)
 
@@ -46,6 +44,17 @@ That being said this game fits in 6 GB of VRAM and
 should give your GPU's rasterization pipeline a run
 for it's money.
 
-I should note that I created this game, it's not
-actually "leaked" that's just a joke.
+The sound effects have been created entirely from scratch
+by Per Kristian Risvik, the original Doom sounds having
+only been sampled at a measly 11 kHz Kristian took it upon
+himself to remake them from scratch in 32 kHz and did a
+marvellous job in doing so, sounding identical to the
+original sound effects in many cases but in a higher
+quality! Having based my game around providing an
+up-to-date Doom-esque/Wolfenstein 3D experience it just
+made complete sense to also include Kristians sounds!
+Check out Kristians website for more information about
+how he remade these remarkable sound effects from scratch,
+audio reverse engineering at it's finest!
+https://www.perkristian.net/game_doom-sfx.shtml
 ```

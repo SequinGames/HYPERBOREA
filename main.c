@@ -19,11 +19,14 @@ void timestamp(char* ts){const time_t tt=time(0);strftime(ts,16,"%H:%M:%S",local
     SDL_Joystick* js = NULL;
     Sint32 xd=0, yd=0;
 #endif
+#define ISAUDIO defined(WIN) || defined(SDL_AUDIO)
+#ifdef ISAUDIO
+    #include "audio.h"
+#endif
 #define uint GLuint
 #define sint GLint
 #define MAX_MODELS 402
-#define VERTEX_SHADE 
-#include "esLuma.h"
+#include "gfx.h"
 const unsigned char icon[]="\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000,),\036\065/\064_)$(@-'*E\070\061\065`-&*\040\000\000\000\001\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\071\061\067\061cT]\214uak\325\226\177\214\365aMT\345XHO\350\223{\211\367\205my\330jWa\225I;@<\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000C<@`wdn\360\224y\205\377\210ku\377\254\220\235\377jTX\377RBH\377\251\213\232\377\244\200\212\377\226{\210\377\215v\177\370m[]t\000\000\000\001\377\377\377\000\377\377\377\000\070/\063>hV^\372\213ox\377\231\200\213\377\207pz\377\223x\203\377o[_\377VIO\377\245\206\221\377\226w\177\377\244\207\221\377\252\213\224\377\220v|\377M=@U\377\377\377\000\014\010\011\005TEJ\234pZc\377sX`\377\207lv\377\241\206\221\377\236}\206\377x_b\377^MR\377\244\206\220\377\242\210\224\377\242\201\206\377\250\205\211\377\242\200\206\377t_c\266.\060.\011,$&\025bMS\321kSY\377{bk\377\205hq\377\210q{\377\260\222\234\377wWY\377VAE\377\246\210\222\377\245\204\214\377\214jl\377\252\212\213\377\242\201\201\377\217op\345C:<--'-(`KQ\332gMR\377cLR\377\200fo\377\177dl\377\243\177\211\377mLL\377F\064\067\377\233z\202\377\236uz\377\231z}\377\242\202\203\377\203aa\377y[]\343\066-\060\067\064,\062QfQX\355\\EH\377tX_\377wT\\\377\212bj\377\241y\200\377pSU\377P?E\377\227qw\377\232rw\377\240|\177\377\253\204\205\377\227np\377\200ci\357\071\062\066U(##\060^KP\342^EH\377[=>\377oNR\377qPU\377{UZ\377[??\377E//\377wQT\377\177]`\377\201]_\377sKK\377\214aa\377\212km\343<\066\066\064\014\011\005\017WCG\310kPU\377XGG\377ebh\377mkr\377xeg\377,!\037\377\035\023\022\377]OR\377dbi\377urv\377jQP\377\206_^\377y\\\\\305\033\025\024\015\000\000\000\003O>C\226nQW\377]UW\377_mu\377epw\377\207\202\204\377O?<\377/#\"\377dfj\377dqz\377gpu\377\201sr\377\217oo\377hRV\204\000\000\000\001\377\377\377\000\065*\062\040E\061\063\270WJJ\377^]a\377PQW\377j[[\377N\070\065\375>-,\373d[[\377XZ_\377SQU\377gUR\377_IH\267;.\061\030\377\377\377\000\377\377\377\000\377\377\377\000\000\000\000\011A\066\066dG:\067\330J:\066\372R><\317\064%\"P%\035\035=F\071\067\275H:\067\370K:\067\341Q?=r\000\000\000\011\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000!\031\024()\040\033W\032\025\024\034\377\377\377\000\377\377\377\000\002\000\000\017%\035\032P/&!/\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000";
 const char appTitle[]="Hyperborea";
 uint winw=1024, winh=768, ks[6]={0};
@@ -273,8 +276,16 @@ void doAttack()
             }
         }
     }
+#if ISAUDIO
+    playSound("wav/shot.wav");
+#endif
     if(sid != -1)
     {
+#if ISAUDIO
+        char tmp[16];
+        sprintf(tmp, "wav/d%u.wav", esRand(1,6));
+        playSound(tmp);
+#endif
         cds[sid] = t;
         protc++;
         if(protc >= 4){prot=1;protc=0;}
@@ -293,6 +304,9 @@ void doAttack()
             {
                 ft = t+3.f;
                 rm = 0.f;
+#if ISAUDIO
+                playSound("wav/art.wav");
+#endif
             }
         }
         gah=0;
@@ -323,7 +337,16 @@ void key_callback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
         else if(key == GLFW_KEY_DOWN || key == GLFW_KEY_S || scancode == scan_s){ks[3]=1;}
         else if(key == GLFW_KEY_J || scancode == scan_j) {ks[4]=1;}
         else if(key == GLFW_KEY_L || scancode == scan_l) {ks[5]=1;}
-        else if((key == GLFW_KEY_SPACE || scancode == scan_space || key == GLFW_KEY_I || scancode == scan_i) && caught == 0.f && ga == 0.f){doAttack();}
+        else if((key == GLFW_KEY_SPACE || scancode == scan_space || key == GLFW_KEY_I || scancode == scan_i) && caught == 0.f)
+        {
+            if(ga == 0.f){doAttack();}
+            else
+            {
+#if ISAUDIO
+                playSound("wav/clip.wav");
+#endif
+            }
+        }
         else if(key == GLFW_KEY_1){sens = 0.0001f;}
         else if(key == GLFW_KEY_2){sens = 0.0003f;}
         else if(key == GLFW_KEY_3){sens = 0.0006f;}
@@ -391,7 +414,16 @@ void mouse_button_callback(GLFWwindow* wnd, int button, int action, int mods)
                 SDL_SetWindowTitle(wnd, appTitle);
 #endif
             }
-            else if(caught == 0.f && ga == 0.f && YESINPUT){doAttack();}
+            else if(caught == 0.f && YESINPUT)
+            {
+                if(ga == 0.f){doAttack();}
+                else
+                {
+#if ISAUDIO
+                    playSound("wav/clip.wav");
+#endif
+                }
+            }
         }
         else if(YESINPUT && button == GLFW_MOUSE_BUTTON_RIGHT)
         {
@@ -451,7 +483,16 @@ void main_loop()
                 else if(key == SDLK_DOWN || key == SDLK_s || scan == SDL_SCANCODE_S){ks[3]=1;}
                 else if(key == SDLK_j || scan == SDL_SCANCODE_J) {ks[4]=1;}
                 else if(key == SDLK_l || scan == SDL_SCANCODE_L) {ks[5]=1;}
-                else if((key == SDLK_SPACE || key == SDL_SCANCODE_SPACE || key == SDLK_i || scan == SDL_SCANCODE_I) && caught == 0.f && ga == 0.f){doAttack();}
+                else if((key == SDLK_SPACE || key == SDL_SCANCODE_SPACE || key == SDLK_i || scan == SDL_SCANCODE_I) && caught == 0.f)
+                {
+                    if(ga == 0.f){doAttack();}
+                    else
+                    {
+#if ISAUDIO
+                        playSound("wav/clip.wav");
+#endif
+                    }
+                }
                 else if(key == SDLK_1){sens = 0.0001f;}
                 else if(key == SDLK_2){sens = 0.0003f;}
                 else if(key == SDLK_3){sens = 0.0006f;}
@@ -520,7 +561,16 @@ void main_loop()
                         SDL_SetWindowTitle(wnd, appTitle);
 #endif
                     }
-                    else if(caught == 0.f && ga == 0.f && YESINPUT){doAttack();}
+                    else if(caught == 0.f && YESINPUT)
+                    {
+                        if(ga == 0.f){doAttack();}
+                        else
+                        {
+#if ISAUDIO
+                            playSound("wav/clip.wav");
+#endif
+                        }
+                    }
                 }
                 else if(YESINPUT && event.button.button == SDL_BUTTON_RIGHT)
                 {
@@ -537,6 +587,9 @@ void main_loop()
                 SDL_FreeSurface(s_icon);
                 SDL_GL_DeleteContext(glc);
                 SDL_DestroyWindow(wnd);
+#ifdef SDL_AUDIO
+                SDL_CloseAudioDevice(gDevice);
+#endif
                 SDL_Quit();
                 exit(0);
             }
@@ -577,7 +630,16 @@ void main_loop()
                     px -= lookz.x * ttdy * dt, py -= lookz.y * ttdy * dt;
                 }
             }
-            if(caught == 0.f && ga == 0.f && (SDL_JoystickGetAxis(js, 2) > 0 || SDL_JoystickGetAxis(js, 5) > 0 || SDL_JoystickGetButton(js, 0) == 1)){doAttack();}
+            if(caught == 0.f && (SDL_JoystickGetAxis(js, 2) > 0 || SDL_JoystickGetAxis(js, 5) > 0 || SDL_JoystickGetButton(js, 0) == 1))
+            {
+                if(ga == 0.f){doAttack();}
+                else
+                {
+#if ISAUDIO
+                    playSound("wav/clip.wav");
+#endif
+                }
+            }
             else if(SDL_JoystickGetButton(js, 3) == 1)
             {
                 static float nt = 0.f;
@@ -673,7 +735,16 @@ void main_loop()
                     px -= lookz.x * ttdy * dt, py -= lookz.y * ttdy * dt;
                 }
             }
-            if(caught == 0.f && ga == 0.f && (axes[4] > 0.03f || axes[5] > 0.03f)){doAttack();}
+            if(caught == 0.f && (axes[4] > 0.03f || axes[5] > 0.03f))
+            {
+                if(ga == 0.f){doAttack();}
+                else
+                {
+#if ISAUDIO
+                    playSound("wav/clip.wav");
+#endif
+                }
+            }
         }
         static float bt = 0;
         if(t > bt)
@@ -683,7 +754,16 @@ void main_loop()
             {
                 if(YESINPUT)
                 {
-                    if(caught == 0.f && ga == 0.f && (buttons[0] == GLFW_PRESS || buttons[6] == GLFW_PRESS)){doAttack();}
+                    if(caught == 0.f && (buttons[0] == GLFW_PRESS || buttons[6] == GLFW_PRESS))
+                    {
+                        if(ga == 0.f){doAttack();}
+                        else
+                        {
+#if ISAUDIO
+                            playSound("wav/clip.wav");
+#endif
+                        }
+                    }
                     else if(buttons[3] == GLFW_PRESS)
                     {
                         static float nt = 0.f;
@@ -823,6 +903,22 @@ void main_loop()
     glUniform1f(specular_id, 0.6f);
     glUniform1f(specpower_id, specpow);
     glUniform1f(viewdist_id, viewdistance);
+    {
+        static float lt = 0.f;
+        static vec lp = (vec){0.f, 0.f, 0.f}, ltp = (vec){0.f, 0.f, 0.f};
+        if(t > lt)
+        {
+            vRuvBT(&ltp);
+            lt = t+esRandFloat(0.3f, 2.f);
+        }
+        const float ldx = ltp.x - lp.x;
+        const float ldy = ltp.y - lp.y;
+        const float ldz = ltp.z - lp.z;
+        lp.x += ldx*0.8f*dt;
+        lp.y += ldy*0.8f*dt;
+        lp.z += ldz*0.8f*dt;
+        glUniform3f(lightpos_id, sinf(lp.x), sinf(lp.y), sinf(lp.z));
+    }
     static float sat = 0.f;
     sat += (0.3f*dt) * ((px+py)*0.006f);
     glUniform3f(hsv_id, sat, 0.f, 0.f);
@@ -833,7 +929,7 @@ void main_loop()
         {
             mIdent(&model);
             mSetPos(&model, (vec){level_floor[i], level_floor[i+1], 0.f});
-            mSetRot90(&model, ((uint)fabsf((level_floor[i]+level_floor[i+1])*0.1f))%4);
+            mSetRot90(&model, ((uint)fabsf(level_floor[i]+level_floor[i+1]))%4);
             updateModelView();
             esBindRender(8);
         }
@@ -934,14 +1030,36 @@ void main_loop()
                 {
                     if(prot == 1)
                     {
+#if ISAUDIO
+                        playSound("wav/splat.wav");
+#endif
                         cds[i] = t;
                         protc=0;
                         if(prota == 0.f){prota=t+1.f;}
                     }
-                    else{caught=t+3.f;}
+                    else
+                    {
+#if ISAUDIO
+                        char tmp[16];
+                        sprintf(tmp, "wav/pd%u.wav", esRand(1,2));
+                        playSound(tmp);
+#endif
+                        caught=t+3.f;
+                    }
                 }
             }
 #endif
+            {
+                const float xm = pix-cx[i], ym = piy-cy[i];
+                const float d = xm*xm + ym*ym;
+                if(d < 0.6f)
+                {
+                    cds[i] = t;
+#ifdef TEST
+                    printf("%u/%u: collision with pickup\n", i);
+#endif
+                }
+            }
             for(uint j=0; j < MAX_MONSTER; j++)
             {
                 if(j == i || cds[j] != 0.f){continue;}
@@ -1329,9 +1447,13 @@ int main(int argc, char** argv)
     printf("----\n");
     printf("Supports the XBOX gamepad.\n");
     printf("----\n");
-    printf("This game should fit in 6 GB of VRAM.\n");
+    printf("This game should fit in 5 GB of VRAM.\n");
     printf("----\n");
     printf("d1baed295c13b4b96f6ed2735a732bec\n");
+    printf("----\n");
+    printf("Sound effects by Per Kristian Risvik (per-kr@online.no)\n");
+    printf("Source: https://www.perkristian.net/game_doom-sfx.shtml\n");
+    printf("\"The high resolution Doom sound effects pack\"\n1.80 MB download - updated 24. February 2012\n");
     printf("----\n");
 #ifdef GLFW
     printf("%s\n", glfwGetVersionString());
@@ -1362,6 +1484,21 @@ int main(int argc, char** argv)
     scan_space = glfwGetKeyScancode(GLFW_KEY_SPACE);
     scan_e = glfwGetKeyScancode(GLFW_KEY_E);
     scan_q = glfwGetKeyScancode(GLFW_KEY_Q);
+#ifdef WIN
+    initializeAudio();
+    cacheSound("wav/art.wav");
+    cacheSound("wav/clip.wav");
+    cacheSound("wav/shot.wav");
+    cacheSound("wav/splat.wav");
+    cacheSound("wav/pd1.wav");
+    cacheSound("wav/pd2.wav");
+    cacheSound("wav/d1.wav");
+    cacheSound("wav/d2.wav");
+    cacheSound("wav/d3.wav");
+    cacheSound("wav/d4.wav");
+    cacheSound("wav/d5.wav");
+    cacheSound("wav/d6.wav");
+#endif
 #else
     SDL_version compiled;
     SDL_version linked;
@@ -1402,6 +1539,22 @@ int main(int argc, char** argv)
         printf("ERROR: SDL_GL_CreateContext(): %s\n", SDL_GetError());
         return 1;
     }
+#ifdef SDL_AUDIO
+    SDL_AudioSpec desiredSpec;
+    desiredSpec.freq = 32000;
+    desiredSpec.format = AUDIO_F32LSB;
+    desiredSpec.channels = 1;
+    desiredSpec.samples = 4096;
+    desiredSpec.callback = audio_callback;
+    desiredSpec.userdata = NULL;
+    gDevice = SDL_OpenAudioDevice(NULL, 0, &desiredSpec, &gAudioSpec, 0);
+    if (gDevice == 0) {
+        fprintf(stderr, "SDL_OpenAudioDevice failed: %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    SDL_PauseAudioDevice(gDevice, 0);
+#endif
     s_icon = SDL_CreateRGBSurfaceWithFormat(0, 16, 16, 32, SDL_PIXELFORMAT_RGBA32);
     memcpy(s_icon->pixels, (Uint32*)&icon, s_icon->pitch*16);
     SDL_SetWindowIcon(wnd, s_icon);
@@ -1425,7 +1578,7 @@ int main(int argc, char** argv)
 #else
     SDL_SetWindowTitle(wnd, "Loading...");
 #endif
-    loadModel("load");
+    loadModel("load", 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mIdent(&view);
     mSetPos(&view, (vec){0.f, 0.f, -1.3f});
@@ -1437,72 +1590,84 @@ int main(int argc, char** argv)
     SDL_GL_SwapWindow(wnd);
 #endif
     unloadModel(0);
-    loadModel("fire");
-    loadModel("hand");
-    loadModel("gun");
-    loadModel("blast");
-    loadModel("prot");
-    loadModel("brain");
-    loadModel("blood");
-    loadModel("floor");
-    loadModel("c1");loadModel("c2");loadModel("c3");loadModel("c4");loadModel("c5");loadModel("c6");loadModel("c7");
-    loadModel("c8");loadModel("c9");loadModel("c10");loadModel("c11");loadModel("c12");loadModel("c13");loadModel("c14");
-    loadModel("c15");loadModel("c16");loadModel("c17");loadModel("c18");loadModel("c19");loadModel("c20");loadModel("c21");
-    loadModel("c22");loadModel("c23");loadModel("c24");loadModel("c25");loadModel("c26");loadModel("c27");loadModel("c28");
-    loadModel("c29");loadModel("c30");loadModel("c31");loadModel("c32");loadModel("c33");loadModel("c34");loadModel("c35");
-    loadModel("c36");loadModel("c37");loadModel("c38");loadModel("c39");loadModel("c40");loadModel("c41");loadModel("c42");
-    loadModel("c43");loadModel("c44");loadModel("c45");loadModel("c46");loadModel("c47");loadModel("c48");loadModel("c49");
-    loadModel("c50");loadModel("c51");loadModel("c52");loadModel("c53");loadModel("c54");loadModel("c55");loadModel("c56");
-    loadModel("c57");loadModel("c58");loadModel("c59");loadModel("c60");loadModel("c61");loadModel("c62");loadModel("c63");
-    loadModel("c64");loadModel("c65");loadModel("c66");loadModel("c67");loadModel("c68");loadModel("c69");loadModel("c70");
-    loadModel("c71");loadModel("c72");loadModel("c73");loadModel("c74");loadModel("c75");loadModel("c76");loadModel("c77");
-    loadModel("c78");loadModel("c79");loadModel("c80");loadModel("c81");loadModel("c82");loadModel("c83");loadModel("c84");
-    loadModel("c85");loadModel("c86");loadModel("c87");loadModel("c88");loadModel("c89");loadModel("c90");loadModel("c91");
-    loadModel("w1");loadModel("w2");loadModel("w3");loadModel("w4");loadModel("w5");loadModel("w6");loadModel("w7");
-    loadModel("w8");loadModel("w9");loadModel("w10");loadModel("w11");loadModel("w12");loadModel("w13");loadModel("w14");
-    loadModel("w15");loadModel("w16");loadModel("w17");loadModel("w18");loadModel("w19");loadModel("w20");loadModel("w21");
-    loadModel("w22");loadModel("w23");loadModel("w24");loadModel("w25");loadModel("w26");loadModel("w27");loadModel("w28");
-    loadModel("w29");loadModel("w30");loadModel("w31");loadModel("w32");loadModel("w33");loadModel("w34");loadModel("w35");
-    loadModel("w36");loadModel("w37");loadModel("w38");loadModel("w39");loadModel("w40");loadModel("w41");loadModel("w42");
-    loadModel("w43");loadModel("w44");loadModel("w45");loadModel("w46");loadModel("w47");loadModel("w48");loadModel("w49");
-    loadModel("w50");loadModel("w51");loadModel("w52");loadModel("w53");loadModel("w54");loadModel("w55");loadModel("w56");
-    loadModel("w57");loadModel("w58");loadModel("w59");loadModel("w60");loadModel("w61");loadModel("w62");loadModel("w63");
-    loadModel("w64");loadModel("w65");loadModel("w66");loadModel("w67");loadModel("w68");loadModel("w69");loadModel("w70");
-    loadModel("w71");loadModel("w72");loadModel("w73");loadModel("w74");loadModel("w75");loadModel("w76");loadModel("w77");
-    loadModel("w78");loadModel("w79");loadModel("w80");loadModel("w81");loadModel("w82");loadModel("w83");loadModel("w84");
-    loadModel("w85");loadModel("w86");loadModel("w87");loadModel("w88");loadModel("w89");loadModel("w90");loadModel("w91");
-    loadModel("w92");loadModel("w93");loadModel("w94");loadModel("w95");loadModel("w96");loadModel("w97");loadModel("w98");
-    loadModel("w99");loadModel("w100");loadModel("w101");loadModel("w102");loadModel("w103");loadModel("w104");loadModel("w105");
-    loadModel("w106");loadModel("w107");loadModel("w108");loadModel("w109");loadModel("w110");loadModel("w111");loadModel("w112");
-    loadModel("w113");loadModel("w114");loadModel("w115");loadModel("w116");loadModel("w117");loadModel("w118");loadModel("w119");
-    loadModel("w120");loadModel("w121");loadModel("w122");loadModel("w123");loadModel("w124");loadModel("w125");loadModel("w126");
-    loadModel("w127");loadModel("w128");loadModel("w129");loadModel("w130");loadModel("w131");loadModel("w132");loadModel("w133");
-    loadModel("w134");loadModel("w135");loadModel("w136");loadModel("w137");loadModel("w138");loadModel("w139");loadModel("w140");
-    loadModel("w141");loadModel("w142");loadModel("w143");loadModel("w144");loadModel("w145");loadModel("w146");loadModel("w147");
-    loadModel("w148");loadModel("w149");loadModel("w150");loadModel("w151");loadModel("w152");loadModel("w153");loadModel("w154");
-    loadModel("w155");loadModel("w156");loadModel("w157");loadModel("w158");loadModel("w159");loadModel("w160");loadModel("w161");
-    loadModel("w162");loadModel("w163");loadModel("w164");loadModel("w165");loadModel("w166");loadModel("w167");loadModel("w168");
-    loadModel("w169");loadModel("w170");loadModel("w171");loadModel("w172");loadModel("w173");loadModel("w174");loadModel("w175");
-    loadModel("w176");loadModel("w177");loadModel("w178");loadModel("w179");loadModel("w180");loadModel("w181");loadModel("w182");
-    loadModel("w183");loadModel("w184");loadModel("w185");loadModel("w186");loadModel("w187");loadModel("w188");loadModel("w189");
-    loadModel("w190");loadModel("w191");loadModel("w192");loadModel("w193");loadModel("w194");loadModel("w195");loadModel("w196");
-    loadModel("w197");loadModel("w198");loadModel("w199");loadModel("w200");loadModel("w201");loadModel("w202");loadModel("w203");
-    loadModel("w204");loadModel("w205");loadModel("w206");loadModel("w207");loadModel("w208");loadModel("w209");loadModel("w210");
-    loadModel("w211");loadModel("w212");loadModel("w213");loadModel("w214");loadModel("w215");loadModel("w216");loadModel("w217");
-    loadModel("w218");loadModel("w219");loadModel("w220");loadModel("w221");loadModel("w222");loadModel("w223");loadModel("w224");
-    loadModel("w225");loadModel("w226");loadModel("w227");loadModel("w228");loadModel("w229");loadModel("w230");loadModel("w231");
-    loadModel("w232");loadModel("w233");loadModel("w234");loadModel("w235");loadModel("w236");loadModel("w237");loadModel("w238");
-    loadModel("w239");loadModel("w240");loadModel("w241");loadModel("w242");loadModel("w243");loadModel("w244");loadModel("w245");
-    loadModel("w246");loadModel("w247");loadModel("w248");loadModel("w249");loadModel("w250");loadModel("w251");loadModel("w252");
-    loadModel("w253");loadModel("w254");loadModel("w255");loadModel("w256");loadModel("w257");loadModel("w258");loadModel("w259");
-    loadModel("w260");loadModel("w261");loadModel("w262");loadModel("w263");loadModel("w264");loadModel("w265");
-    loadModel("p1");loadModel("p2");loadModel("p3");loadModel("p4");loadModel("p5");loadModel("p6");loadModel("p7");
-    loadModel("p8");loadModel("p9");loadModel("p10");loadModel("p11");loadModel("p12");loadModel("p13");loadModel("p14");
-    loadModel("p15");loadModel("p16");loadModel("p17");loadModel("p18");loadModel("p19");loadModel("p20");loadModel("p21");
-    loadModel("p22");loadModel("p23");loadModel("p24");loadModel("p25");loadModel("p26");loadModel("p27");loadModel("p28");
-    loadModel("p29");loadModel("p30");loadModel("p31");loadModel("p32");loadModel("p33");loadModel("p34");loadModel("p35");
-    loadModel("p36");loadModel("p37");
-    puts("Models Loaded...");
+    const time_t st = time(0);
+    loadModel("fire", 1);
+    loadModel("hand", 2);
+    loadModel("gun", 3);
+    loadModel("blast", 4);
+    loadModel("prot", 5);
+    loadModel("brain", 6);
+    loadModel("blood", 7);
+    loadModel("floor", 8);
+    loadModel("c1", 9);loadModel("c2", 10);loadModel("c3", 11);loadModel("c4", 12);loadModel("c5", 13);loadModel("c6", 14);
+    loadModel("c7", 15);loadModel("c8", 16);loadModel("c9", 17);loadModel("c10", 18);loadModel("c11", 19);loadModel("c12", 20);
+    loadModel("c13", 21);loadModel("c14", 22);loadModel("c15", 23);loadModel("c16", 24);loadModel("c17", 25);loadModel("c18", 26);
+    loadModel("c19", 27);loadModel("c20", 28);loadModel("c21", 29);loadModel("c22", 30);loadModel("c23", 31);loadModel("c24", 32);
+    loadModel("c25", 33);loadModel("c26", 34);loadModel("c27", 35);loadModel("c28", 36);loadModel("c29", 37);loadModel("c30", 38);
+    loadModel("c31", 39);loadModel("c32", 40);loadModel("c33", 41);loadModel("c34", 42);loadModel("c35", 43);loadModel("c36", 44);
+    loadModel("c37", 45);loadModel("c38", 46);loadModel("c39", 47);loadModel("c40", 48);loadModel("c41", 49);loadModel("c42", 50);
+    loadModel("c43", 51);loadModel("c44", 52);loadModel("c45", 53);loadModel("c46", 54);loadModel("c47", 55);loadModel("c48", 56);
+    loadModel("c49", 57);loadModel("c50", 58);loadModel("c51", 59);loadModel("c52", 60);loadModel("c53", 61);loadModel("c54", 62);
+    loadModel("c55", 63);loadModel("c56", 64);loadModel("c57", 65);loadModel("c58", 66);loadModel("c59", 67);loadModel("c60", 68);
+    loadModel("c61", 69);loadModel("c62", 70);loadModel("c63", 71);loadModel("c64", 72);loadModel("c65", 73);loadModel("c66", 74);
+    loadModel("c67", 75);loadModel("c68", 76);loadModel("c69", 77);loadModel("c70", 78);loadModel("c71", 79);loadModel("c72", 80);
+    loadModel("c73", 81);loadModel("c74", 82);loadModel("c75", 83);loadModel("c76", 84);loadModel("c77", 85);loadModel("c78", 86);
+    loadModel("c79", 87);loadModel("c80", 88);loadModel("c81", 89);loadModel("c82", 90);loadModel("c83", 91);loadModel("c84", 92);
+    loadModel("c85", 93);loadModel("c86", 94);loadModel("c87", 95);loadModel("c88", 96);loadModel("c89", 97);loadModel("c90", 98);
+    loadModel("c91", 99);
+    loadModel("w1", 100);loadModel("w2", 101);loadModel("w3", 102);loadModel("w4", 103);loadModel("w5", 104);loadModel("w6", 105);
+    loadModel("w7", 106);loadModel("w8", 107);loadModel("w9", 108);loadModel("w10", 109);loadModel("w11", 110);loadModel("w12", 111);
+    loadModel("w13", 112);loadModel("w14", 113);loadModel("w15", 114);loadModel("w16", 115);loadModel("w17", 116);loadModel("w18", 117);
+    loadModel("w19", 118);loadModel("w20", 119);loadModel("w21", 120);loadModel("w22", 121);loadModel("w23", 122);loadModel("w24", 123);
+    loadModel("w25", 124);loadModel("w26", 125);loadModel("w27", 126);loadModel("w28", 127);loadModel("w29", 128);loadModel("w30", 129);
+    loadModel("w31", 130);loadModel("w32", 131);loadModel("w33", 132);loadModel("w34", 133);loadModel("w35", 134);loadModel("w36", 135);
+    loadModel("w37", 136);loadModel("w38", 137);loadModel("w39", 138);loadModel("w40", 139);loadModel("w41", 140);loadModel("w42", 141);
+    loadModel("w43", 142);loadModel("w44", 143);loadModel("w45", 144);loadModel("w46", 145);loadModel("w47", 146);loadModel("w48", 147);
+    loadModel("w49", 148);loadModel("w50", 149);loadModel("w51", 150);loadModel("w52", 151);loadModel("w53", 152);loadModel("w54", 153);
+    loadModel("w55", 154);loadModel("w56", 155);loadModel("w57", 156);loadModel("w58", 157);loadModel("w59", 158);loadModel("w60", 159);
+    loadModel("w61", 160);loadModel("w62", 161);loadModel("w63", 162);loadModel("w64", 163);loadModel("w65", 164);loadModel("w66", 165);
+    loadModel("w67", 166);loadModel("w68", 167);loadModel("w69", 168);loadModel("w70", 169);loadModel("w71", 170);loadModel("w72", 171);
+    loadModel("w73", 172);loadModel("w74", 173);loadModel("w75", 174);loadModel("w76", 175);loadModel("w77", 176);loadModel("w78", 177);
+    loadModel("w79", 178);loadModel("w80", 179);loadModel("w81", 180);loadModel("w82", 181);loadModel("w83", 182);loadModel("w84", 183);
+    loadModel("w85", 184);loadModel("w86", 185);loadModel("w87", 186);loadModel("w88", 187);loadModel("w89", 188);loadModel("w90", 189);
+    loadModel("w91", 190);loadModel("w92", 191);loadModel("w93", 192);loadModel("w94", 193);loadModel("w95", 194);loadModel("w96", 195);
+    loadModel("w97", 196);loadModel("w98", 197);loadModel("w99", 198);loadModel("w100", 199);loadModel("w101", 200);loadModel("w102", 201);
+    loadModel("w103", 202);loadModel("w104", 203);loadModel("w105", 204);loadModel("w106", 205);loadModel("w107", 206);loadModel("w108", 207);
+    loadModel("w109", 208);loadModel("w110", 209);loadModel("w111", 210);loadModel("w112", 211);loadModel("w113", 212);loadModel("w114", 213);
+    loadModel("w115", 214);loadModel("w116", 215);loadModel("w117", 216);loadModel("w118", 217);loadModel("w119", 218);loadModel("w120", 219);
+    loadModel("w121", 220);loadModel("w122", 221);loadModel("w123", 222);loadModel("w124", 223);loadModel("w125", 224);loadModel("w126", 225);
+    loadModel("w127", 226);loadModel("w128", 227);loadModel("w129", 228);loadModel("w130", 229);loadModel("w131", 230);loadModel("w132", 231);
+    loadModel("w133", 232);loadModel("w134", 233);loadModel("w135", 234);loadModel("w136", 235);loadModel("w137", 236);loadModel("w138", 237);
+    loadModel("w139", 238);loadModel("w140", 239);loadModel("w141", 240);loadModel("w142", 241);loadModel("w143", 242);loadModel("w144", 243);
+    loadModel("w145", 244);loadModel("w146", 245);loadModel("w147", 246);loadModel("w148", 247);loadModel("w149", 248);loadModel("w150", 249);
+    loadModel("w151", 250);loadModel("w152", 251);loadModel("w153", 252);loadModel("w154", 253);loadModel("w155", 254);loadModel("w156", 255);
+    loadModel("w157", 256);loadModel("w158", 257);loadModel("w159", 258);loadModel("w160", 259);loadModel("w161", 260);loadModel("w162", 261);
+    loadModel("w163", 262);loadModel("w164", 263);loadModel("w165", 264);loadModel("w166", 265);loadModel("w167", 266);loadModel("w168", 267);
+    loadModel("w169", 268);loadModel("w170", 269);loadModel("w171", 270);loadModel("w172", 271);loadModel("w173", 272);loadModel("w174", 273);
+    loadModel("w175", 274);loadModel("w176", 275);loadModel("w177", 276);loadModel("w178", 277);loadModel("w179", 278);loadModel("w180", 279);
+    loadModel("w181", 280);loadModel("w182", 281);loadModel("w183", 282);loadModel("w184", 283);loadModel("w185", 284);loadModel("w186", 285);
+    loadModel("w187", 286);loadModel("w188", 287);loadModel("w189", 288);loadModel("w190", 289);loadModel("w191", 290);loadModel("w192", 291);
+    loadModel("w193", 292);loadModel("w194", 293);loadModel("w195", 294);loadModel("w196", 295);loadModel("w197", 296);loadModel("w198", 297);
+    loadModel("w199", 298);loadModel("w200", 299);loadModel("w201", 300);loadModel("w202", 301);loadModel("w203", 302);loadModel("w204", 303);
+    loadModel("w205", 304);loadModel("w206", 305);loadModel("w207", 306);loadModel("w208", 307);loadModel("w209", 308);loadModel("w210", 309);
+    loadModel("w211", 310);loadModel("w212", 311);loadModel("w213", 312);loadModel("w214", 313);loadModel("w215", 314);loadModel("w216", 315);
+    loadModel("w217", 316);loadModel("w218", 317);loadModel("w219", 318);loadModel("w220", 319);loadModel("w221", 320);loadModel("w222", 321);
+    loadModel("w223", 322);loadModel("w224", 323);loadModel("w225", 324);loadModel("w226", 325);loadModel("w227", 326);loadModel("w228", 327);
+    loadModel("w229", 328);loadModel("w230", 329);loadModel("w231", 330);loadModel("w232", 331);loadModel("w233", 332);loadModel("w234", 333);
+    loadModel("w235", 334);loadModel("w236", 335);loadModel("w237", 336);loadModel("w238", 337);loadModel("w239", 338);loadModel("w240", 339);
+    loadModel("w241", 340);loadModel("w242", 341);loadModel("w243", 342);loadModel("w244", 343);loadModel("w245", 344);loadModel("w246", 345);
+    loadModel("w247", 346);loadModel("w248", 347);loadModel("w249", 348);loadModel("w250", 349);loadModel("w251", 350);loadModel("w252", 351);
+    loadModel("w253", 352);loadModel("w254", 353);loadModel("w255", 354);loadModel("w256", 355);loadModel("w257", 356);loadModel("w258", 357);
+    loadModel("w259", 358);loadModel("w260", 359);loadModel("w261", 360);loadModel("w262", 361);loadModel("w263", 362);loadModel("w264", 363);
+    loadModel("w265", 364);
+    loadModel("p1", 365);loadModel("p2", 366);loadModel("p3", 367);loadModel("p4", 368);loadModel("p5", 369);loadModel("p6", 370);
+    loadModel("p7", 371);loadModel("p8", 372);loadModel("p9", 373);loadModel("p10", 374);loadModel("p11", 375);loadModel("p12", 376);
+    loadModel("p13", 377);loadModel("p14", 378);loadModel("p15", 379);loadModel("p16", 380);loadModel("p17", 381);loadModel("p18", 382);
+    loadModel("p19", 383);loadModel("p20", 384);loadModel("p21", 385);loadModel("p22", 386);loadModel("p23", 387);loadModel("p24", 388);
+    loadModel("p25", 389);loadModel("p26", 390);loadModel("p27", 391);loadModel("p28", 392);loadModel("p29", 393);loadModel("p30", 394);
+    loadModel("p31", 395);loadModel("p32", 396);loadModel("p33", 397);loadModel("p34", 398);loadModel("p35", 399);loadModel("p36", 400);
+    loadModel("p37", 401);
+    printf("Models Loaded... (%lus)\n", time(0)-st);
 #ifdef GLFW
     glfwSetWindowTitle(wnd, "Loading...");
 #else
@@ -1513,6 +1678,9 @@ int main(int argc, char** argv)
     resetGame(0);
 #ifdef GLFW
     while(!glfwWindowShouldClose(wnd)){main_loop();}
+#ifdef WIN
+    cleanupAudio();
+#endif
     glfwDestroyWindow(wnd);
     glfwTerminate();
     exit(EXIT_SUCCESS);
