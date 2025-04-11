@@ -59,7 +59,7 @@ const uint level_wall_id[] = {174,198,105,119,183,134,205,149,107,156,196,237,11
 float px=0.f, py=0.f;
 float fx=0.f, fy=0.f;
 float caught=0.f;
-float winst = 0.f;
+float winst=0.f;
 float ga = 0.f;
 uint gah = 0;
 uint prot = 0;
