@@ -19,7 +19,7 @@ upx:
 	upx --lzma --best $(name)_windows.exe
 
 test:
-	cc -DTEST main.c -Ofast -lSDL2 -lGLESv2 -lEGL -lm -o /tmp/$(name)_test
+	cc -DTEST main.c rply.c -Ofast -lSDL2 -lGLESv2 -lEGL -lm -o /tmp/$(name)_test
 	/tmp/$(name)_test
 	rm /tmp/$(name)_test
 
