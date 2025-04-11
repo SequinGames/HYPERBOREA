@@ -1,4 +1,4 @@
-You will need the `vbo` directory to run the game, it's included in the [release build here](https://github.com/SequinGames/Hyperborea/releases/tag/V2).
+You will need the `vbo` and `wav` directories to run the game, they are included in the [release build here](https://github.com/SequinGames/Hyperborea/releases/tag/V2).
 
 ![Screenshot](https://github.com/SequinGames/Hyperborea/blob/%E1%95%95(-%E1%90%9B-)%E1%95%97/screenshot.png?raw=true)
 
