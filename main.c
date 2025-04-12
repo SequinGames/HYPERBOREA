@@ -19,14 +19,14 @@ void timestamp(char* ts){const time_t tt=time(0);strftime(ts,16,"%H:%M:%S",local
     SDL_Joystick* js = NULL;
     Sint32 xd=0, yd=0;
 #endif
-#define ISAUDIO defined(WIN) || defined(SDL_AUDIO)
-#ifdef ISAUDIO
+#if defined(BSD) || defined(WIN) || defined(SDL_AUDIO)
     #include "audio.h"
+    #define ISAUDIO
 #endif
 #define uint GLuint
 #define sint GLint
 #define MAX_MODELS 402
-#define VERTEX_SHADE
+#define VERTEX_SHADE 
 #include "gfx.h"
 const unsigned char icon[]="\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000,),\036\065/\064_)$(@-'*E\070\061\065`-&*\040\000\000\000\001\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\071\061\067\061cT]\214uak\325\226\177\214\365aMT\345XHO\350\223{\211\367\205my\330jWa\225I;@<\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000C<@`wdn\360\224y\205\377\210ku\377\254\220\235\377jTX\377RBH\377\251\213\232\377\244\200\212\377\226{\210\377\215v\177\370m[]t\000\000\000\001\377\377\377\000\377\377\377\000\070/\063>hV^\372\213ox\377\231\200\213\377\207pz\377\223x\203\377o[_\377VIO\377\245\206\221\377\226w\177\377\244\207\221\377\252\213\224\377\220v|\377M=@U\377\377\377\000\014\010\011\005TEJ\234pZc\377sX`\377\207lv\377\241\206\221\377\236}\206\377x_b\377^MR\377\244\206\220\377\242\210\224\377\242\201\206\377\250\205\211\377\242\200\206\377t_c\266.\060.\011,$&\025bMS\321kSY\377{bk\377\205hq\377\210q{\377\260\222\234\377wWY\377VAE\377\246\210\222\377\245\204\214\377\214jl\377\252\212\213\377\242\201\201\377\217op\345C:<--'-(`KQ\332gMR\377cLR\377\200fo\377\177dl\377\243\177\211\377mLL\377F\064\067\377\233z\202\377\236uz\377\231z}\377\242\202\203\377\203aa\377y[]\343\066-\060\067\064,\062QfQX\355\\EH\377tX_\377wT\\\377\212bj\377\241y\200\377pSU\377P?E\377\227qw\377\232rw\377\240|\177\377\253\204\205\377\227np\377\200ci\357\071\062\066U(##\060^KP\342^EH\377[=>\377oNR\377qPU\377{UZ\377[??\377E//\377wQT\377\177]`\377\201]_\377sKK\377\214aa\377\212km\343<\066\066\064\014\011\005\017WCG\310kPU\377XGG\377ebh\377mkr\377xeg\377,!\037\377\035\023\022\377]OR\377dbi\377urv\377jQP\377\206_^\377y\\\\\305\033\025\024\015\000\000\000\003O>C\226nQW\377]UW\377_mu\377epw\377\207\202\204\377O?<\377/#\"\377dfj\377dqz\377gpu\377\201sr\377\217oo\377hRV\204\000\000\000\001\377\377\377\000\065*\062\040E\061\063\270WJJ\377^]a\377PQW\377j[[\377N\070\065\375>-,\373d[[\377XZ_\377SQU\377gUR\377_IH\267;.\061\030\377\377\377\000\377\377\377\000\377\377\377\000\000\000\000\011A\066\066dG:\067\330J:\066\372R><\317\064%\"P%\035\035=F\071\067\275H:\067\370K:\067\341Q?=r\000\000\000\011\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000!\031\024()\040\033W\032\025\024\034\377\377\377\000\377\377\377\000\002\000\000\017%\035\032P/&!/\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000";
 const char appTitle[]="Hyperborea";
@@ -59,7 +59,7 @@ const uint level_wall_id[] = {174,198,105,119,183,134,205,149,107,156,196,237,11
 float px=0.f, py=0.f;
 float fx=0.f, fy=0.f;
 float caught=0.f;
-float winst=0.f;
+float winst = 0.f;
 float ga = 0.f;
 uint gah = 0;
 uint prot = 0;
@@ -277,12 +277,12 @@ void doAttack()
             }
         }
     }
-#if ISAUDIO
+#ifdef ISAUDIO
     playSound("wav/shot.wav");
 #endif
     if(sid != -1)
     {
-#if ISAUDIO
+#ifdef ISAUDIO
         char tmp[16];
         sprintf(tmp, "wav/d%u.wav", esRand(1,6));
         playSound(tmp);
@@ -305,7 +305,7 @@ void doAttack()
             {
                 ft = t+3.f;
                 rm = 0.f;
-#if ISAUDIO
+#ifdef ISAUDIO
                 playSound("wav/art.wav");
 #endif
             }
@@ -343,7 +343,7 @@ void key_callback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
             if(ga == 0.f){doAttack();}
             else
             {
-#if ISAUDIO
+#ifdef ISAUDIO
                 playSound("wav/clip.wav");
 #endif
             }
@@ -420,7 +420,7 @@ void mouse_button_callback(GLFWwindow* wnd, int button, int action, int mods)
                 if(ga == 0.f){doAttack();}
                 else
                 {
-#if ISAUDIO
+#ifdef ISAUDIO
                     playSound("wav/clip.wav");
 #endif
                 }
@@ -489,7 +489,7 @@ void main_loop()
                     if(ga == 0.f){doAttack();}
                     else
                     {
-#if ISAUDIO
+#ifdef ISAUDIO
                         playSound("wav/clip.wav");
 #endif
                     }
@@ -567,7 +567,7 @@ void main_loop()
                         if(ga == 0.f){doAttack();}
                         else
                         {
-#if ISAUDIO
+#ifdef ISAUDIO
                             playSound("wav/clip.wav");
 #endif
                         }
@@ -585,12 +585,12 @@ void main_loop()
             break;
             case SDL_QUIT:
             {
+#ifdef ISAUDIO
+                cleanupAudio();
+#endif
                 SDL_FreeSurface(s_icon);
                 SDL_GL_DeleteContext(glc);
                 SDL_DestroyWindow(wnd);
-#ifdef SDL_AUDIO
-                SDL_CloseAudioDevice(gDevice);
-#endif
                 SDL_Quit();
                 exit(0);
             }
@@ -636,7 +636,7 @@ void main_loop()
                 if(ga == 0.f){doAttack();}
                 else
                 {
-#if ISAUDIO
+#ifdef ISAUDIO
                     playSound("wav/clip.wav");
 #endif
                 }
@@ -741,7 +741,7 @@ void main_loop()
                 if(ga == 0.f){doAttack();}
                 else
                 {
-#if ISAUDIO
+#ifdef ISAUDIO
                     playSound("wav/clip.wav");
 #endif
                 }
@@ -760,7 +760,7 @@ void main_loop()
                         if(ga == 0.f){doAttack();}
                         else
                         {
-#if ISAUDIO
+#ifdef ISAUDIO
                             playSound("wav/clip.wav");
 #endif
                         }
@@ -1031,7 +1031,7 @@ void main_loop()
                 {
                     if(prot == 1)
                     {
-#if ISAUDIO
+#ifdef ISAUDIO
                         playSound("wav/splat.wav");
 #endif
                         cds[i] = t;
@@ -1040,7 +1040,7 @@ void main_loop()
                     }
                     else
                     {
-#if ISAUDIO
+#ifdef ISAUDIO
                         char tmp[16];
                         sprintf(tmp, "wav/pd%u.wav", esRand(1,2));
                         playSound(tmp);
@@ -1485,21 +1485,6 @@ int main(int argc, char** argv)
     scan_space = glfwGetKeyScancode(GLFW_KEY_SPACE);
     scan_e = glfwGetKeyScancode(GLFW_KEY_E);
     scan_q = glfwGetKeyScancode(GLFW_KEY_Q);
-#ifdef WIN
-    initializeAudio();
-    cacheSound("wav/art.wav");
-    cacheSound("wav/clip.wav");
-    cacheSound("wav/shot.wav");
-    cacheSound("wav/splat.wav");
-    cacheSound("wav/pd1.wav");
-    cacheSound("wav/pd2.wav");
-    cacheSound("wav/d1.wav");
-    cacheSound("wav/d2.wav");
-    cacheSound("wav/d3.wav");
-    cacheSound("wav/d4.wav");
-    cacheSound("wav/d5.wav");
-    cacheSound("wav/d6.wav");
-#endif
 #else
     SDL_version compiled;
     SDL_version linked;
@@ -1540,25 +1525,24 @@ int main(int argc, char** argv)
         printf("ERROR: SDL_GL_CreateContext(): %s\n", SDL_GetError());
         return 1;
     }
-#ifdef SDL_AUDIO
-    SDL_AudioSpec desiredSpec;
-    desiredSpec.freq = 32000;
-    desiredSpec.format = AUDIO_F32LSB;
-    desiredSpec.channels = 1;
-    desiredSpec.samples = 4096;
-    desiredSpec.callback = audio_callback;
-    desiredSpec.userdata = NULL;
-    gDevice = SDL_OpenAudioDevice(NULL, 0, &desiredSpec, &gAudioSpec, 0);
-    if (gDevice == 0) {
-        fprintf(stderr, "SDL_OpenAudioDevice failed: %s\n", SDL_GetError());
-        SDL_Quit();
-        return 1;
-    }
-    SDL_PauseAudioDevice(gDevice, 0);
-#endif
     s_icon = SDL_CreateRGBSurfaceWithFormat(0, 16, 16, 32, SDL_PIXELFORMAT_RGBA32);
     memcpy(s_icon->pixels, (Uint32*)&icon, s_icon->pitch*16);
     SDL_SetWindowIcon(wnd, s_icon);
+#endif
+#ifdef ISAUDIO
+        initializeAudio();
+        cacheSound("wav/art.wav");
+        cacheSound("wav/clip.wav");
+        cacheSound("wav/shot.wav");
+        cacheSound("wav/splat.wav");
+        cacheSound("wav/pd1.wav");
+        cacheSound("wav/pd2.wav");
+        cacheSound("wav/d1.wav");
+        cacheSound("wav/d2.wav");
+        cacheSound("wav/d3.wav");
+        cacheSound("wav/d4.wav");
+        cacheSound("wav/d5.wav");
+        cacheSound("wav/d6.wav");
 #endif
     makeLambert();
     makePhong();
@@ -1679,7 +1663,7 @@ int main(int argc, char** argv)
     resetGame(0);
 #ifdef GLFW
     while(!glfwWindowShouldClose(wnd)){main_loop();}
-#ifdef WIN
+#ifdef ISAUDIO
     cleanupAudio();
 #endif
     glfwDestroyWindow(wnd);
