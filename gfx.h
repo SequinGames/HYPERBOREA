@@ -332,6 +332,7 @@ void esDebug(const GLuint state)
 #ifdef TEST
         printf("Loaded PLY: %u %u %u\n", id, vbl, ibl);
 #endif
+        return id;
     }
 #endif
 void unloadModel(const uint id)
