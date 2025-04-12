@@ -12,7 +12,8 @@ win:
 	strip --strip-unneeded $(name)_windows.exe
 
 bsd:
-	cc -DGLFW main.c -I/usr/local/include -L/usr/local/lib -Ofast -lglfw -lm -o $(name)_bsd
+	cc -DGLFW -DBSD main.c -I/usr/local/include -L/usr/local/lib -Ofast -lglfw -lpthread -lm -o $(name)_bsd
+	strip --strip-unneeded $(name)_bsd
 
 upx:
 	upx --lzma --best $(name)_linux
@@ -44,3 +45,4 @@ clean:
 	rm -f $(name)_linux
 	rm -f $(name)_dbg
 	rm -f $(name)_windows.exe
+	rm -f $(name)_bsd
