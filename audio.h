@@ -544,7 +544,6 @@
     #include <sys/ioctl.h>
     #include <sys/soundcard.h>
     #include <pthread.h>
-    #include <errno.h>
     #define NUM_CHANNELS 8
     #define BUFFER_SAMPLES 1024
     #define SAMPLE_RATE 32000
