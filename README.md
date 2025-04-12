@@ -1,5 +1,7 @@
 You will need the `vbo` and `wav` directories to run the game, they are included in the [release build here](https://github.com/SequinGames/Hyperborea/releases/tag/V2).
 
+For the highest quality graphics you will need to download [HyperboreaV2.7z.001](https://github.com/SequinGames/Hyperborea/releases/download/V2/HyperboreaV2.7z.001) and [HyperboreaV2.7z.002](https://github.com/SequinGames/Hyperborea/releases/download/V2/HyperboreaV2.7z.002) however if you have an older GPU and cannot render the highest quality graphics you can download either [HyperboreaV2_MediumGFX.7z](https://github.com/SequinGames/Hyperborea/releases/download/V2/HyperboreaV2_MediumGFX.7z) or [HyperboreaV2_LowGFX.7z](https://github.com/SequinGames/Hyperborea/releases/download/V2/HyperboreaV2_LowGFX.7z).
+
 ![Screenshot](https://github.com/SequinGames/Hyperborea/blob/%E1%95%95(-%E1%90%9B-)%E1%95%97/screenshot.png?raw=true)
 
 ## https://silentrooms.itch.io/
