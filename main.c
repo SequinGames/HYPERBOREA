@@ -1448,8 +1448,6 @@ int main(int argc, char** argv)
     printf("----\n");
     printf("Supports the XBOX gamepad.\n");
     printf("----\n");
-    printf("This game should fit in 5 GB of VRAM.\n");
-    printf("----\n");
     printf("d1baed295c13b4b96f6ed2735a732bec\n");
     printf("----\n");
     printf("Sound effects by Per Kristian Risvik (per-kr@online.no)\n");
