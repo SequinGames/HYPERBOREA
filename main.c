@@ -1661,14 +1661,14 @@ int main(int argc, char** argv)
     resetGame(0);
 #ifdef GLFW
     while(!glfwWindowShouldClose(wnd)){main_loop();}
+#ifdef ISAUDIO
+    cleanupAudio();
+#endif
     glfwDestroyWindow(wnd);
     glfwTerminate();
     exit(EXIT_SUCCESS);
 #else
     while(1){main_loop();}
-#endif
-#ifdef ISAUDIO
-    cleanupAudio();
 #endif
     return 0;
 }
