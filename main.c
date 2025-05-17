@@ -1652,7 +1652,7 @@ int main(int argc, char** argv)
     loadModel("p37", 401);
     printf("Models Loaded... (%lus)\n", time(0)-st);
 #ifdef GLFW
-    glfwSetWindowTitle(wnd, "Loading...");
+    glfwSetWindowTitle(wnd, appTitle);
 #else
     SDL_SetWindowTitle(wnd, appTitle);
 #endif
