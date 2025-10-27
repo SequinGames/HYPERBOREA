@@ -19,7 +19,7 @@ void timestamp(char* ts){const time_t tt=time(0);strftime(ts,16,"%H:%M:%S",local
     SDL_Joystick* js = NULL;
     Sint32 xd=0, yd=0;
 #endif
-#if defined(BSD) || defined(WIN) || defined(SDL_AUDIO)
+#if defined(BSD) || defined(WIN) || defined(SDL_AUDIO) || defined(ALSA)
     #include "audio.h"
     #define ISAUDIO
 #endif
@@ -241,6 +241,7 @@ void resetGame(uint mode)
     while(d < 36.f);
     pix = tx, piy = ty;
     for(uint i=0; i < MAX_MONSTER; i++){resetMonster(i);}
+    setMasterVolume(0.3f);
 #ifdef GLFW
     glfwSetWindowTitle(wnd, appTitle);
 #else
@@ -633,12 +634,17 @@ void main_loop()
             }
             if(caught == 0.f && (SDL_JoystickGetAxis(js, 2) > 0 || SDL_JoystickGetAxis(js, 5) > 0 || SDL_JoystickGetButton(js, 0) == 1))
             {
-                if(ga == 0.f){doAttack();}
-                else
+                static float nt = 0.f;
+                if(t > nt)
                 {
+                    if(ga == 0.f){doAttack();}
+                    else
+                    {
 #ifdef ISAUDIO
-                    playSound("wav/clip.wav");
+                        playSound("wav/clip.wav");
 #endif
+                    }
+                    nt = t+0.2f;
                 }
             }
             else if(SDL_JoystickGetButton(js, 3) == 1)
@@ -738,12 +744,17 @@ void main_loop()
             }
             if(caught == 0.f && (axes[4] > 0.03f || axes[5] > 0.03f))
             {
-                if(ga == 0.f){doAttack();}
-                else
+                static float nt = 0.f;
+                if(t > nt)
                 {
+                    if(ga == 0.f){doAttack();}
+                    else
+                    {
 #ifdef ISAUDIO
-                    playSound("wav/clip.wav");
+                        playSound("wav/clip.wav");
 #endif
+                    }
+                    nt = t+0.2f;
                 }
             }
         }
@@ -757,12 +768,17 @@ void main_loop()
                 {
                     if(caught == 0.f && (buttons[0] == GLFW_PRESS || buttons[6] == GLFW_PRESS))
                     {
-                        if(ga == 0.f){doAttack();}
-                        else
+                        static float nt = 0.f;
+                        if(t > nt)
                         {
+                            if(ga == 0.f){doAttack();}
+                            else
+                            {
 #ifdef ISAUDIO
-                            playSound("wav/clip.wav");
+                                playSound("wav/clip.wav");
 #endif
+                            }
+                            nt = t+0.2f;
                         }
                     }
                     else if(buttons[3] == GLFW_PRESS)

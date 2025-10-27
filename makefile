@@ -1,4 +1,4 @@
-.PHONY: all win bsd upx test testsoft test60 dbg grind clean
+.PHONY: all glfw win bsd bsdsdl upx vbo test testsoft test60 dbg grind clean
 
 name = Hyperborea
 SHELL := /bin/bash
@@ -6,6 +6,10 @@ SHELL := /bin/bash
 all:
 	cc -DSDL_AUDIO main.c -Ofast -lSDL2 -lGLESv2 -lEGL -lm -o $(name)_linux
 	strip --strip-unneeded $(name)_linux
+
+glfw:
+	cc -DGLFW -DALSA main.c -Ofast -lglfw -lasound -lpthread -lm -o $(name)_glfw
+	strip --strip-unneeded $(name)_glfw
 
 win:
 	i686-w64-mingw32-gcc -DGLFW -DWIN main.c -L. -Ofast -lwinmm -lglfw3dll -lm -o $(name)_windows.exe
@@ -15,9 +19,18 @@ bsd:
 	cc -DGLFW -DBSD main.c -I/usr/local/include -L/usr/local/lib -Ofast -lglfw -lpthread -lm -o $(name)_bsd
 	strip --strip-unneeded $(name)_bsd
 
+bsdsdl:
+	cc -DSDL_AUDIO main.c -I/usr/local/include -L/usr/local/lib -Ofast -lSDL2 -lGLESv2 -lEGL -lm -o $(name)_bsdsdl
+	strip --strip-unneeded $(name)_bsdsdl
+
 upx:
 	upx --lzma --best $(name)_linux
 	upx --lzma --best $(name)_windows.exe
+
+vbo:
+	cc -DTEST -DRPLY -DEXPORT_VBO main.c rply.c -Ofast -lSDL2 -lGLESv2 -lEGL -lm -o /tmp/$(name)_test
+	/tmp/$(name)_test
+	rm /tmp/$(name)_test
 
 test:
 	cc -DTEST main.c -Ofast -lSDL2 -lGLESv2 -lEGL -lm -o /tmp/$(name)_test
@@ -46,3 +59,4 @@ clean:
 	rm -f $(name)_dbg
 	rm -f $(name)_windows.exe
 	rm -f $(name)_bsd
+	rm -f $(name)_bsdsdl

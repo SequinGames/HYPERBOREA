@@ -1,5 +1,8 @@
 #ifndef AUDIO_H
 #define AUDIO_H 
+static float gMasterVolume = 1.0f;
+static inline void setMasterVolume(float v){if(v < 0.0f){v = 0.0f;}gMasterVolume = v;}
+static inline float getMasterVolume(void){return gMasterVolume;}
 #ifdef WIN
     #include <windows.h>
     #include <mmsystem.h>
@@ -52,6 +55,7 @@
                     }
                 }
             }
+            mixed *= gMasterVolume;
             if (mixed > 1.0f)
                 mixed = 1.0f;
             else if (mixed < -1.0f)
@@ -384,6 +388,7 @@
                     }
                 }
             }
+            mixed *= gMasterVolume;
             if (mixed > 1.0f)
                 mixed = 1.0f;
             else if (mixed < -1.0f)
@@ -589,6 +594,7 @@
                     }
                 }
             }
+            mixed *= gMasterVolume;
             if (mixed > 1.0f)
                 mixed = 1.0f;
             else if (mixed < -1.0f)
@@ -872,6 +878,324 @@
             free(cs);
             cs = next;
         }
+    }
+#endif
+#ifdef ALSA
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <stdint.h>
+    #include <pthread.h>
+    #include <alsa/asoundlib.h>
+    #define NUM_CHANNELS 8
+    #define BUFFER_SAMPLES 1024
+    #define SAMPLE_RATE 32000
+    #define CHANNEL_COUNT 1
+    typedef struct {
+        float* samples;
+        unsigned int sample_count;
+        unsigned int cur_sample;
+        int playing;
+    } SoundChannel;
+    typedef struct CachedSound {
+        char filename[256];
+        float* samples;
+        unsigned int sample_count;
+        struct CachedSound* next;
+    } CachedSound;
+    static int audioSystemInitialized = 0;
+    static SoundChannel channels[NUM_CHANNELS];
+    static CachedSound* soundCache = NULL;
+    static snd_pcm_t* alsaHandle = NULL;
+    static pthread_t audioThreadId;
+    static int audioRunning = 0;
+    void* audioThread(void* arg);
+    void MixAudio(float* outBuffer, int numSamples);
+    CachedSound* loadWavFromFile(const char* filename);
+    CachedSound* findCachedSound(const char* filename);
+    void addCachedSound(CachedSound* cs);
+    void cleanupAudio(void);
+    float* convertWavToStandard(void* rawData, unsigned int totalSamples,
+                                unsigned short audioFormat, unsigned short bitsPerSample,
+                                unsigned short numChannels, unsigned int sampleRate,
+                                unsigned int* outSampleCount);
+    void MixAudio(float* outBuffer, int numSamples) {
+        for (int i = 0; i < numSamples; i++) {
+            float mixed = 0.0f;
+            for (int ch = 0; ch < NUM_CHANNELS; ch++) {
+                if (channels[ch].playing) {
+                    if (channels[ch].cur_sample < channels[ch].sample_count) {
+                        mixed += channels[ch].samples[channels[ch].cur_sample];
+                        channels[ch].cur_sample++;
+                    } else {
+                        channels[ch].playing = 0;
+                    }
+                }
+            }
+            mixed *= gMasterVolume;
+            if (mixed > 1.0f) mixed = 1.0f;
+            else if (mixed < -1.0f) mixed = -1.0f;
+            outBuffer[i] = mixed;
+        }
+    }
+    float* convertWavToStandard(void* rawData, unsigned int totalSamples,
+                                unsigned short audioFormat, unsigned short bitsPerSample,
+                                unsigned short numChannels, unsigned int sampleRate,
+                                unsigned int* outSampleCount) {
+        unsigned int inputFrames = totalSamples / numChannels;
+        float* monoBuffer = (float*)malloc(sizeof(float) * inputFrames);
+        if (!monoBuffer) return NULL;
+        for (unsigned int i = 0; i < inputFrames; i++) {
+            float sum = 0.0f;
+            for (int ch = 0; ch < numChannels; ch++) {
+                if (audioFormat == 1) {
+                    if (bitsPerSample == 8) {
+                        unsigned char s = ((unsigned char*)rawData)[i * numChannels + ch];
+                        sum += ((int)s - 128) / 128.0f;
+                    } else if (bitsPerSample == 16) {
+                        short s = ((short*)rawData)[i * numChannels + ch];
+                        sum += s / 32768.0f;
+                    } else if (bitsPerSample == 32) {
+                        int s = ((int*)rawData)[i * numChannels + ch];
+                        sum += s / 2147483648.0f;
+                    }
+                } else if (audioFormat == 3) {
+                    float s = ((float*)rawData)[i * numChannels + ch];
+                    sum += s;
+                }
+            }
+            monoBuffer[i] = sum / numChannels;
+        }
+        if (sampleRate == SAMPLE_RATE) {
+            *outSampleCount = inputFrames;
+            return monoBuffer;
+        } else {
+            unsigned int targetFrames = (unsigned int)(inputFrames * ((float)SAMPLE_RATE / sampleRate));
+            float* resampled = (float*)malloc(sizeof(float) * targetFrames);
+            if (!resampled) { free(monoBuffer); return NULL; }
+            for (unsigned int i = 0; i < targetFrames; i++) {
+                float pos = ((float)i * sampleRate) / SAMPLE_RATE;
+                unsigned int idx = (unsigned int)pos;
+                float frac = pos - idx;
+                float s1 = (idx < inputFrames) ? monoBuffer[idx] : 0.0f;
+                float s2 = ((idx + 1) < inputFrames) ? monoBuffer[idx + 1] : 0.0f;
+                resampled[i] = s1 * (1.0f - frac) + s2 * frac;
+            }
+            free(monoBuffer);
+            *outSampleCount = targetFrames;
+            return resampled;
+        }
+    }
+    CachedSound* loadWavFromFile(const char* filename) {
+        FILE* f = fopen(filename, "rb");
+        if (!f) { printf("Error opening file: %s\n", filename); return NULL; }
+        char riff[4];
+        if (fread(riff, 1, 4, f) != 4 || strncmp(riff, "RIFF", 4) != 0) {
+            printf("Not a valid RIFF file: %s\n", filename); fclose(f); return NULL;
+        }
+        fseek(f, 8, SEEK_SET);
+        char waveTag[4];
+        if (fread(waveTag, 1, 4, f) != 4 || strncmp(waveTag, "WAVE", 4) != 0) {
+            printf("Not a valid WAVE file: %s\n", filename); fclose(f); return NULL;
+        }
+        unsigned short audioFormat = 0, numChannelsWav = 0, bitsPerSample = 0;
+        unsigned int sampleRate = 0, dataSize = 0;
+        int fmtFound = 0, dataFound = 0;
+        while (!dataFound && !feof(f)) {
+            char chunkId[5] = {0};
+            unsigned int chunkSize = 0;
+            if (fread(chunkId, 1, 4, f) != 4) break;
+            if (fread(&chunkSize, sizeof(unsigned int), 1, f) != 1) break;
+            if (strncmp(chunkId, "fmt ", 4) == 0) {
+                fmtFound = 1;
+                fread(&audioFormat, sizeof(unsigned short), 1, f);
+                fread(&numChannelsWav, sizeof(unsigned short), 1, f);
+                fread(&sampleRate, sizeof(unsigned int), 1, f);
+                fseek(f, 6, SEEK_CUR);
+                fread(&bitsPerSample, sizeof(unsigned short), 1, f);
+                if (chunkSize > 16) fseek(f, chunkSize - 16, SEEK_CUR);
+            } else if (strncmp(chunkId, "data", 4) == 0) {
+                dataFound = 1;
+                dataSize = chunkSize;
+                break;
+            } else {
+                fseek(f, chunkSize, SEEK_CUR);
+            }
+        }
+        if (!fmtFound || !dataFound) {
+            printf("Failed to find necessary chunks in file: %s\n", filename);
+            fclose(f); return NULL;
+        }
+        unsigned int totalSamples = dataSize * 8 / bitsPerSample;
+        void* rawData = malloc(dataSize);
+        if (!rawData) { printf("Memory allocation failed for file: %s\n", filename); fclose(f); return NULL; }
+        fread(rawData, 1, dataSize, f);
+        fclose(f);
+        unsigned int standardSampleCount = 0;
+        float* standardSamples = convertWavToStandard(rawData, totalSamples, audioFormat,
+                                                      bitsPerSample, numChannelsWav, sampleRate,
+                                                      &standardSampleCount);
+        free(rawData);
+        if (!standardSamples) { printf("Conversion to standard format failed for file: %s\n", filename); return NULL; }
+        CachedSound* cs = (CachedSound*)malloc(sizeof(CachedSound));
+        if (!cs) { free(standardSamples); return NULL; }
+        strncpy(cs->filename, filename, 255);
+        cs->filename[255] = '\0';
+        cs->samples = standardSamples;
+        cs->sample_count = standardSampleCount;
+        cs->next = NULL;
+        return cs;
+    }
+    CachedSound* findCachedSound(const char* filename) {
+        CachedSound* cs = soundCache;
+        while (cs) {
+            if (strcmp(cs->filename, filename) == 0) return cs;
+            cs = cs->next;
+        }
+        return NULL;
+    }
+    void addCachedSound(CachedSound* cs) {
+        cs->next = soundCache;
+        soundCache = cs;
+    }
+    static int alsa_configure(snd_pcm_t* h) {
+        snd_pcm_hw_params_t* params;
+        snd_pcm_hw_params_alloca(&params);
+        if (snd_pcm_hw_params_any(h, params) < 0) return -1;
+        if (snd_pcm_hw_params_set_access(h, params, SND_PCM_ACCESS_RW_INTERLEAVED) < 0) return -1;
+        if (snd_pcm_hw_params_set_format(h, params, SND_PCM_FORMAT_S16_LE) < 0) return -1;
+        if (snd_pcm_hw_params_set_channels(h, params, CHANNEL_COUNT) < 0) return -1;
+        unsigned int rate = SAMPLE_RATE;
+        if (snd_pcm_hw_params_set_rate_near(h, params, &rate, 0) < 0) return -1;
+        snd_pcm_uframes_t period = BUFFER_SAMPLES;
+        snd_pcm_hw_params_set_period_size_near(h, params, &period, 0);
+        unsigned int periods = 4;
+        snd_pcm_hw_params_set_periods_near(h, params, &periods, 0);
+        if (snd_pcm_hw_params(h, params) < 0) return -1;
+        return 0;
+    }
+    void* audioThread(void* arg) {
+        int16_t buffer[BUFFER_SAMPLES * CHANNEL_COUNT];
+        float mixBuffer[BUFFER_SAMPLES];
+        while (audioRunning) {
+            MixAudio(mixBuffer, BUFFER_SAMPLES);
+            for (int i = 0; i < BUFFER_SAMPLES; i++) {
+                float s = mixBuffer[i];
+                if (s > 1.0f) s = 1.0f;
+                else if (s < -1.0f) s = -1.0f;
+                buffer[i] = (int16_t)(s * 32767.0f);
+            }
+            int framesLeft = BUFFER_SAMPLES;
+            int16_t* ptr = buffer;
+            while (framesLeft > 0 && audioRunning) {
+                snd_pcm_sframes_t wrote = snd_pcm_writei(alsaHandle, ptr, framesLeft);
+                if (wrote == -EPIPE) {
+                    snd_pcm_prepare(alsaHandle);
+                    continue;
+                } else if (wrote < 0) {
+                    fprintf(stderr, "ALSA write error: %s\n", snd_strerror(wrote));
+                    break;
+                }
+                framesLeft -= (int)wrote;
+                ptr += wrote * CHANNEL_COUNT;
+            }
+        }
+        return NULL;
+    }
+    void initializeAudio(void) {
+        for (int i = 0; i < NUM_CHANNELS; i++) {
+            channels[i].samples = NULL;
+            channels[i].sample_count = 0;
+            channels[i].cur_sample = 0;
+            channels[i].playing = 0;
+        }
+        if (snd_pcm_open(&alsaHandle, "default", SND_PCM_STREAM_PLAYBACK, 0) < 0) {
+            fprintf(stderr, "Failed to open ALSA device.\n");
+            exit(1);
+        }
+        if (alsa_configure(alsaHandle) != 0) {
+            fprintf(stderr, "Failed to configure ALSA device.\n");
+            snd_pcm_close(alsaHandle);
+            alsaHandle = NULL;
+            exit(1);
+        }
+        audioRunning = 1;
+        if (pthread_create(&audioThreadId, NULL, audioThread, NULL) != 0) {
+            fprintf(stderr, "pthread_create failed\n");
+            snd_pcm_close(alsaHandle);
+            alsaHandle = NULL;
+            audioRunning = 0;
+            exit(1);
+        }
+        audioSystemInitialized = 1;
+    }
+    void playSoundLazy(const char* filename) {
+        if (!audioSystemInitialized) {
+            initializeAudio();
+        }
+        CachedSound* cs = findCachedSound(filename);
+        if (!cs) {
+            cs = loadWavFromFile(filename);
+            if (!cs) {
+                printf("Failed to load sound: %s\n", filename);
+                return;
+            }
+            addCachedSound(cs);
+        }
+        for (int i = 0; i < NUM_CHANNELS; i++) {
+            if (!channels[i].playing) {
+                channels[i].samples = cs->samples;
+                channels[i].sample_count = cs->sample_count;
+                channels[i].cur_sample = 0;
+                channels[i].playing = 1;
+                return;
+            }
+        }
+        printf("No free channel available to play sound: %s\n", filename);
+    }
+    void playSound(const char* filename) {
+        CachedSound* cs = findCachedSound(filename);
+        if (!cs) {
+            printf("Sound not cached: %s\n", filename);
+            return;
+        }
+        for (int i = 0; i < NUM_CHANNELS; i++) {
+            if (!channels[i].playing) {
+                channels[i].samples = cs->samples;
+                channels[i].sample_count = cs->sample_count;
+                channels[i].cur_sample = 0;
+                channels[i].playing = 1;
+                return;
+            }
+        }
+        printf("No free channel available to play sound: %s\n", filename);
+    }
+    void cacheSound(const char* filename) {
+        CachedSound* cs = loadWavFromFile(filename);
+        if (!cs) {
+            printf("Failed to load sound: %s\n", filename);
+            return;
+        }
+        addCachedSound(cs);
+    }
+    void cleanupAudio(void) {
+        audioRunning = 0;
+        if (audioSystemInitialized) {
+            pthread_join(audioThreadId, NULL);
+        }
+        if (alsaHandle) {
+            snd_pcm_drain(alsaHandle);
+            snd_pcm_close(alsaHandle);
+            alsaHandle = NULL;
+        }
+        CachedSound* cs = soundCache;
+        while (cs) {
+            CachedSound* next = cs->next;
+            if (cs->samples) free(cs->samples);
+            free(cs);
+            cs = next;
+        }
+        audioSystemInitialized = 0;
     }
 #endif
 #endif
