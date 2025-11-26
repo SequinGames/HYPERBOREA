@@ -241,7 +241,9 @@ void resetGame(uint mode)
     while(d < 36.f);
     pix = tx, piy = ty;
     for(uint i=0; i < MAX_MONSTER; i++){resetMonster(i);}
+#ifdef ISAUDIO
     setMasterVolume(0.3f);
+#endif
 #ifdef GLFW
     glfwSetWindowTitle(wnd, appTitle);
 #else
