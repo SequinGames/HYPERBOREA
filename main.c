@@ -328,11 +328,7 @@ void key_callback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
             lock_mouse = 0;
             glfwSetInputMode(wnd, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             glfwGetCursorPos(wnd, &lx, &ly);
-#ifdef GLFW
             glfwSetWindowTitle(wnd, "Paused");
-#else
-            SDL_SetWindowTitle(wnd, "Paused");
-#endif
         }
         if(NOINPUT){return;}
         if( key == GLFW_KEY_LEFT || key == GLFW_KEY_A || scancode == scan_a){ks[0]=1;}
@@ -412,11 +408,7 @@ void mouse_button_callback(GLFWwindow* wnd, int button, int action, int mods)
                 lock_mouse = 1;
                 glfwSetInputMode(wnd, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
                 glfwGetCursorPos(wnd, &lx, &ly);
-#ifdef GLFW
                 glfwSetWindowTitle(wnd, appTitle);
-#else
-                SDL_SetWindowTitle(wnd, appTitle);
-#endif
             }
             else if(caught == 0.f && YESINPUT)
             {
@@ -473,11 +465,7 @@ void main_loop()
                     lock_mouse = 0;
                     SDL_GetRelativeMouseState(&xd, &yd);
                     SDL_SetRelativeMouseMode(SDL_FALSE);
-#ifdef GLFW
-                    glfwSetWindowTitle(wnd, "Paused");
-#else
                     SDL_SetWindowTitle(wnd, "Paused");
-#endif
                 }
                 if(NOINPUT){return;}
                 const SDL_Keycode scan = event.key.keysym.scancode;
@@ -559,11 +547,7 @@ void main_loop()
                         lock_mouse = 1;
                         SDL_GetRelativeMouseState(&xd, &yd);
                         SDL_SetRelativeMouseMode(SDL_TRUE);
-#ifdef GLFW
-                        glfwSetWindowTitle(wnd, appTitle);
-#else
                         SDL_SetWindowTitle(wnd, appTitle);
-#endif
                     }
                     else if(caught == 0.f && YESINPUT)
                     {
@@ -689,22 +673,8 @@ void main_loop()
             if(t > nt)
             {
                 jspause=1-jspause;
-                if(jspause == 0)
-                {
-#ifdef GLFW
-                    glfwSetWindowTitle(wnd, appTitle);
-#else
-                    SDL_SetWindowTitle(wnd, appTitle);
-#endif
-                }
-                else
-                {
-#ifdef GLFW
-                    glfwSetWindowTitle(wnd, "Paused");
-#else
-                    SDL_SetWindowTitle(wnd, "Paused");
-#endif
-                }
+                if(jspause == 0){SDL_SetWindowTitle(wnd, appTitle);}
+                else{SDL_SetWindowTitle(wnd, "Paused");}
                 nt = t+0.333f;
             }
         }
@@ -823,22 +793,8 @@ void main_loop()
                     if(t > nt)
                     {
                         jspause=1-jspause;
-                        if(jspause == 0)
-                        {
-#ifdef GLFW
-                            glfwSetWindowTitle(wnd, appTitle);
-#else
-                            SDL_SetWindowTitle(wnd, appTitle);
-#endif
-                        }
-                        else
-                        {
-#ifdef GLFW
-                            glfwSetWindowTitle(wnd, "Paused");
-#else
-                            SDL_SetWindowTitle(wnd, "Paused");
-#endif
-                        }
+                        if(jspause == 0){glfwSetWindowTitle(wnd, appTitle);}
+                        else{glfwSetWindowTitle(wnd, "Paused");}
                         nt = t+0.333f;
                     }
                 }
