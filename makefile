@@ -33,22 +33,22 @@ vbo:
 	rm /tmp/$(name)_test
 
 test:
-	cc -DTEST main.c -Ofast -lSDL2 -lGLESv2 -lEGL -lm -o /tmp/$(name)_test
+	cc -DGLFW -DTEST main.c -Ofast -lglfw -lm -o /tmp/$(name)_test
 	/tmp/$(name)_test
 	rm /tmp/$(name)_test
 
 testsoft:
-	cc -DTEST main.c -Ofast -lSDL2 -lGLESv2 -lEGL -lm -o /tmp/$(name)_test
+	cc -DGLFW -DTEST main.c -Ofast -lglfw -lm -o /tmp/$(name)_test
 	LIBGL_ALWAYS_SOFTWARE=1 /tmp/$(name)_test
 	rm /tmp/$(name)_test
 
 test60:
-	cc -DTEST main.c -Ofast -lSDL2 -lGLESv2 -lEGL -lm -o /tmp/$(name)_test
+	cc -DGLFW -DTEST main.c -Ofast -lglfw -lm -o /tmp/$(name)_test
 	xrandr --rate 60 && /tmp/$(name)_test && xrandr --rate 165
 	rm /tmp/$(name)_test
 
 dbg:
-	cc main.c -fsanitize=leak -fsanitize=undefined -fsanitize=address -ggdb3 -lSDL2 -lGLESv2 -lEGL -lm -o $(name)_dbg
+	cc -DGLFW main.c -fsanitize=leak -fsanitize=undefined -fsanitize=address -ggdb3 -lglfw -lm -o $(name)_dbg
 	$(name)_dbg
 
 grind:
@@ -60,3 +60,4 @@ clean:
 	rm -f $(name)_windows.exe
 	rm -f $(name)_bsd
 	rm -f $(name)_bsdsdl
+	rm -f $(name)_glfw
