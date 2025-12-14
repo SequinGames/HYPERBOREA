@@ -222,7 +222,7 @@ void resetGame(uint mode)
     }
     else{px=-84.f, py=-90.f;}
     fx=0.f, fy=0.f;
-    pid = 366;
+    pid = 365;
     caught = 0.f;
     xrot = PI;
     ft = 0.f;
@@ -1175,7 +1175,7 @@ void main_loop()
             {
                 ft = 0.f;
                 pid++;
-                if(pid > 401){pid = 366;}
+                if(pid > 401){pid = 365;}
                 float d2 = 42.f, tx, ty;
                 do
                 {
