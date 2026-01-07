@@ -219,7 +219,7 @@ void esDebug(const GLuint state)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, esModelArray[id].iid);
         glDrawElements(GL_TRIANGLES, esModelArray[id].ni, GL_UNSIGNED_INT, 0);
     }
-    #define MAX_MODEL_SIZE 5767168
+    #define MAX_MODEL_SIZE 7340032
     GLfloat vertex_buffer[MAX_MODEL_SIZE];
     GLuint index_buffer[MAX_MODEL_SIZE];
 #ifdef RPLY

@@ -1,15 +1,17 @@
-.PHONY: all glfw win bsd bsdsdl upx vbo test testsoft test60 dbg grind clean
+.PHONY: all sdl glfw win bsd bsdsdl upx vbo test testsoft test60 dbg grind clean
 
 name = Hyperborea
 SHELL := /bin/bash
 
-all:
-	cc -DSDL_AUDIO main.c -Ofast -lSDL2 -lGLESv2 -lEGL -lm -o $(name)_linux
-	strip --strip-unneeded $(name)_linux
+all: glfw
+
+sdl:
+	cc -DSDL_AUDIO main.c -Ofast -lSDL2 -lGLESv2 -lEGL -lm -o $(name)_sdl
+	strip --strip-unneeded $(name)_sdl
 
 glfw:
-	cc -DGLFW -DALSA main.c -Ofast -lglfw -lasound -lpthread -lm -o $(name)_glfw
-	strip --strip-unneeded $(name)_glfw
+	cc -DGLFW -DALSA main.c -Ofast -lglfw -lasound -lpthread -lm -o $(name)_linux
+	strip --strip-unneeded $(name)_linux
 
 win:
 	i686-w64-mingw32-gcc -DGLFW -DWIN main.c -L. -Ofast -lwinmm -lglfw3dll -lm -o $(name)_windows.exe
@@ -55,7 +57,7 @@ grind:
 	valgrind --leak-check=full --leak-check=full ./$(name)_linux
 
 clean:
-	rm -f $(name)_linux
+	rm -f $(name)_sdl
 	rm -f $(name)_dbg
 	rm -f $(name)_windows.exe
 	rm -f $(name)_bsd

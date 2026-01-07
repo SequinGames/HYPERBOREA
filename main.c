@@ -25,9 +25,9 @@ void timestamp(char* ts){const time_t tt=time(0);strftime(ts,16,"%H:%M:%S",local
 #endif
 #define uint GLuint
 #define sint GLint
-#define MAX_MODELS 402
+#define MAX_MODELS 403
 #define VERTEX_SHADE 
-#include "gfx.h"
+#include "esLuma.h"
 const unsigned char icon[]="\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000,),\036\065/\064_)$(@-'*E\070\061\065`-&*\040\000\000\000\001\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\071\061\067\061cT]\214uak\325\226\177\214\365aMT\345XHO\350\223{\211\367\205my\330jWa\225I;@<\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000C<@`wdn\360\224y\205\377\210ku\377\254\220\235\377jTX\377RBH\377\251\213\232\377\244\200\212\377\226{\210\377\215v\177\370m[]t\000\000\000\001\377\377\377\000\377\377\377\000\070/\063>hV^\372\213ox\377\231\200\213\377\207pz\377\223x\203\377o[_\377VIO\377\245\206\221\377\226w\177\377\244\207\221\377\252\213\224\377\220v|\377M=@U\377\377\377\000\014\010\011\005TEJ\234pZc\377sX`\377\207lv\377\241\206\221\377\236}\206\377x_b\377^MR\377\244\206\220\377\242\210\224\377\242\201\206\377\250\205\211\377\242\200\206\377t_c\266.\060.\011,$&\025bMS\321kSY\377{bk\377\205hq\377\210q{\377\260\222\234\377wWY\377VAE\377\246\210\222\377\245\204\214\377\214jl\377\252\212\213\377\242\201\201\377\217op\345C:<--'-(`KQ\332gMR\377cLR\377\200fo\377\177dl\377\243\177\211\377mLL\377F\064\067\377\233z\202\377\236uz\377\231z}\377\242\202\203\377\203aa\377y[]\343\066-\060\067\064,\062QfQX\355\\EH\377tX_\377wT\\\377\212bj\377\241y\200\377pSU\377P?E\377\227qw\377\232rw\377\240|\177\377\253\204\205\377\227np\377\200ci\357\071\062\066U(##\060^KP\342^EH\377[=>\377oNR\377qPU\377{UZ\377[??\377E//\377wQT\377\177]`\377\201]_\377sKK\377\214aa\377\212km\343<\066\066\064\014\011\005\017WCG\310kPU\377XGG\377ebh\377mkr\377xeg\377,!\037\377\035\023\022\377]OR\377dbi\377urv\377jQP\377\206_^\377y\\\\\305\033\025\024\015\000\000\000\003O>C\226nQW\377]UW\377_mu\377epw\377\207\202\204\377O?<\377/#\"\377dfj\377dqz\377gpu\377\201sr\377\217oo\377hRV\204\000\000\000\001\377\377\377\000\065*\062\040E\061\063\270WJJ\377^]a\377PQW\377j[[\377N\070\065\375>-,\373d[[\377XZ_\377SQU\377gUR\377_IH\267;.\061\030\377\377\377\000\377\377\377\000\377\377\377\000\000\000\000\011A\066\066dG:\067\330J:\066\372R><\317\064%\"P%\035\035=F\071\067\275H:\067\370K:\067\341Q?=r\000\000\000\011\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000!\031\024()\040\033W\032\025\024\034\377\377\377\000\377\377\377\000\002\000\000\017%\035\032P/&!/\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000\377\377\377\000";
 const char appTitle[]="Hyperborea";
 uint winw=1024, winh=768, ks[6]={0};
@@ -241,9 +241,6 @@ void resetGame(uint mode)
     while(d < 36.f);
     pix = tx, piy = ty;
     for(uint i=0; i < MAX_MONSTER; i++){resetMonster(i);}
-#ifdef ISAUDIO
-    setMasterVolume(0.3f);
-#endif
 #ifdef GLFW
     glfwSetWindowTitle(wnd, appTitle);
 #else
@@ -318,6 +315,13 @@ void doAttack()
     ga=t;
 }
 #ifdef GLFW
+void window_close_callback(GLFWwindow* wnd)
+{
+    glfwSetWindowShouldClose(wnd, GLFW_TRUE);
+    glfwDestroyWindow(wnd);
+    glfwTerminate();
+    exit(EXIT_SUCCESS);
+}
 void window_size_callback(GLFWwindow* wnd, int width, int height){updateWindowSize(width, height);}
 void key_callback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
 {
@@ -325,10 +329,20 @@ void key_callback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
     {
         if(key == GLFW_KEY_ESCAPE)
         {
-            lock_mouse = 0;
-            glfwSetInputMode(wnd, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            glfwGetCursorPos(wnd, &lx, &ly);
-            glfwSetWindowTitle(wnd, "Paused");
+            lock_mouse = 1 - lock_mouse;
+            if(lock_mouse == 0)
+            {
+                glfwSetInputMode(wnd, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                glfwGetCursorPos(wnd, &lx, &ly);
+                glfwSetWindowTitle(wnd, "Paused");
+            }
+            else
+            {
+                if(json == 1){jspause = 0;}
+                glfwSetInputMode(wnd, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                glfwGetCursorPos(wnd, &lx, &ly);
+                glfwSetWindowTitle(wnd, appTitle);
+            }
         }
         if(NOINPUT){return;}
         if( key == GLFW_KEY_LEFT || key == GLFW_KEY_A || scancode == scan_a){ks[0]=1;}
@@ -378,12 +392,27 @@ void key_callback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
             if(t-lfct > 2.0)
             {
                 char strts[16];timestamp(&strts[0]);
-                printf("[%s] FPS: %g\n", strts, fc/(t-lfct));
+                const float fps = fc/(t-lfct);
+                printf("[%s] FPS: %g\n", strts, fps);
+                char nt[1024];
+                sprintf(nt, "Hyperborea - FPS: %.0f\n", fps);
+                glfwSetWindowTitle(wnd, nt);
                 lfct = t; fc = 0;
             }
         }
         else if(key == GLFW_KEY_R){resetGame(1);}
         else if(key == GLFW_KEY_T){resetGame(3);}
+#ifdef ISAUDIO
+        else if(key == GLFW_KEY_M)
+        {
+            static uint v = 2;
+            v++;
+            if(v > 2){v=0;}
+            if(v == 0){setMasterVolume(0.f);}
+            else if(v == 1){setMasterVolume(0.1f);}
+            else if(v == 2){setMasterVolume(0.3f);}
+        }
+#endif
     }
     else if(action == GLFW_RELEASE)
     {
@@ -462,10 +491,19 @@ void main_loop()
                 const SDL_Keycode key = event.key.keysym.sym;
                 if(key == SDLK_ESCAPE)
                 {
-                    lock_mouse = 0;
-                    SDL_GetRelativeMouseState(&xd, &yd);
-                    SDL_SetRelativeMouseMode(SDL_FALSE);
-                    SDL_SetWindowTitle(wnd, "Paused");
+                    lock_mouse = 1 - lock_mouse;
+                    if(lock_mouse == 0)
+                    {
+                        SDL_GetRelativeMouseState(&xd, &yd);
+                        SDL_SetRelativeMouseMode(SDL_FALSE);
+                        SDL_SetWindowTitle(wnd, "Paused");
+                    }
+                    else
+                    {
+                        if(json == 1){jspause = 0;}
+                        SDL_GetRelativeMouseState(&xd, &yd);
+                        SDL_SetWindowTitle(wnd, appTitle);
+                    }
                 }
                 if(NOINPUT){return;}
                 const SDL_Keycode scan = event.key.keysym.scancode;
@@ -516,12 +554,27 @@ void main_loop()
                     if(t-lfct > 2.0)
                     {
                         char strts[16];timestamp(&strts[0]);
-                        printf("[%s] FPS: %g\n", strts, fc/(t-lfct));
+                        const float fps = fc/(t-lfct);
+                        printf("[%s] FPS: %g\n", strts, fps);
+                        char nt[1024];
+                        sprintf(nt, "Hyperborea - FPS: %.0f\n", fps);
+                        SDL_SetWindowTitle(wnd, nt);
                         lfct = t; fc = 0;
                     }
                 }
                 else if(key == SDLK_r){resetGame(1);}
                 else if(key == SDLK_t){resetGame(3);}
+#ifdef ISAUDIO
+                else if(key == SDLK_m)
+                {
+                    static uint v = 2;
+                    v++;
+                    if(v > 2){v=0;}
+                    if(v == 0){setMasterVolume(0.f);}
+                    else if(v == 1){setMasterVolume(0.1f);}
+                    else if(v == 2){setMasterVolume(0.3f);}
+                }
+#endif
             }
             break;
             case SDL_KEYUP:
@@ -1248,6 +1301,10 @@ void main_loop()
     {
         glClear(GL_DEPTH_BUFFER_BIT);
         {
+            static float kp1 = 3.8f;
+            static float kp2 = -0.8f;
+            static float kp3 = 8.8f;
+            static float bob = 0.f;
             const float td = t-ga;
             if(ga != 0.f)
             {
@@ -1255,12 +1312,26 @@ void main_loop()
                 {
                     vec ld = lookz;
                     ld.z = 0.f;
-                    vMulS(&ld, ld, 1.5f);
+                    vMulS(&ld, ld, 1.7f);
                     vec np = (vec){-px, -py, 0.5f};
                     vAdd(&np, np, ld);
                     mIdent(&model);
-                    mSetPos(&model, (vec){np.x, np.y, 0.16f});
+                    mSetPos(&model, (vec){np.x, np.y, 0.13f+sinf(bob)*0.03f});
                     mSetRotZ(&model, -xrot);
+                    if(td < 0.16f)
+                    {
+                        mRotY(&model, -0.03f - (kp1*td));
+                        mRotZ(&model, kp2*td);
+                        mRotX(&model, kp3*td);
+                    }
+                    else if(td >= 0.16f && td <= 0.32f)
+                    {
+                        const float rtd = 0.16f - (td-0.16f);
+                        mRotY(&model, -0.03f - (kp1*rtd));
+                        mRotZ(&model, kp2*rtd);
+                        mRotX(&model, kp3*rtd);
+                    }
+                    mScale1(&model, 0.6f);
                     mRotX(&model, 4.8f*td);
                     updateModelView();
                     glUniform1f(opacity_id, 1.f-(td*1.219512195f));
@@ -1269,10 +1340,6 @@ void main_loop()
                     glDisable(GL_BLEND);
                 }
             }
-            static float kp1 = 3.8f;
-            static float kp2 = -0.8f;
-            static float kp3 = 8.8f;
-            static float bob = 0.f;
             vec ld = lookz;
             vMulS(&ld, ld, 1.f);
             vec np = (vec){-px, -py, 0.5f};
@@ -1382,6 +1449,15 @@ void main_loop()
             glClear(GL_DEPTH_BUFFER_BIT);
             esBindRender(2);
         }
+        if(!PAUSE_CHECK)
+        {
+            mIdent(&model);
+            mSetPos(&model, (vec){-px, -py, 0.f});
+            mSetRotZ(&model, -xrot);
+            updateModelView();
+            glClear(GL_DEPTH_BUFFER_BIT);
+            esBindRender(402);
+        }
     }
 #ifdef GLFW
     glfwSwapBuffers(wnd);
@@ -1412,13 +1488,14 @@ int main(int argc, char** argv)
     printf("- KEYBOARD:\n");
     printf("WASD = Move.\n");
     printf("J/L = Look Left/Right.\n");
-    printf("SPACE = Shoot.\n");
+    printf("I/SPACE = Shoot.\n");
     printf("Q/E = 180 degree turn.\n");
     printf("R = Reset game.\n");
     printf("T = Reset game (teleport).\n");
     printf("F = FPS to console.\n");
     printf("1-9 = Adjusts mouse sensitivity.\n");
     printf("0 = Resets mouse sensitivity.\n");
+    printf("M = Cycle Volume\n");
     printf("----\n");
     printf("Supports the XBOX gamepad.\n");
     printf("----\n");
@@ -1443,6 +1520,7 @@ int main(int argc, char** argv)
     glfwSetKeyCallback(wnd, key_callback);
     glfwSetMouseButtonCallback(wnd, mouse_button_callback);
     glfwSetCursorPosCallback(wnd, cursor_position_callback);
+    glfwSetWindowCloseCallback(wnd, window_close_callback);
     glfwMakeContextCurrent(wnd);
     gladLoadGL(glfwGetProcAddress);
     glfwSwapInterval(1);
@@ -1503,6 +1581,7 @@ int main(int argc, char** argv)
 #endif
 #ifdef ISAUDIO
         initializeAudio();
+        setMasterVolume(0.3f);
         cacheSound("wav/art.wav");
         cacheSound("wav/clip.wav");
         cacheSound("wav/shot.wav");
@@ -1624,6 +1703,7 @@ int main(int argc, char** argv)
     loadModel("p25", 389);loadModel("p26", 390);loadModel("p27", 391);loadModel("p28", 392);loadModel("p29", 393);loadModel("p30", 394);
     loadModel("p31", 395);loadModel("p32", 396);loadModel("p33", 397);loadModel("p34", 398);loadModel("p35", 399);loadModel("p36", 400);
     loadModel("p37", 401);
+    loadModel("menu", 402);
     printf("Models Loaded... (%lus)\n", time(0)-st);
 #ifdef GLFW
     glfwSetWindowTitle(wnd, appTitle);
