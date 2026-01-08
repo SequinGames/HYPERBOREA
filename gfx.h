@@ -476,7 +476,7 @@ const GLchar* v3 =
         "vertCol += hsv;\n"
         "vertCol = hsv2rgb(vertCol);\n"
         "gl_Position = projection * vertPos4;\n"
-        "vec3 lightDir = normalize(lightpos - vertPos);\n"
+        "vec3 lightDir = abs(normalize(lightpos - vertPos));\n"
         "vec3 viewDir = normalize(-vertPos);\n"
 #ifndef BLINN_PHONG
         "vec3 reflectDir = reflect(-lightDir, vertNorm);\n"
@@ -646,7 +646,7 @@ const GLchar* f2 =
     "varying vec3 vlightPos;\n"
     "void main()\n"
     "{\n"
-        "vec3 lightDir = normalize(vlightPos - vertPos);\n"
+        "vec3 lightDir = abs(normalize(vlightPos - vertPos));\n"
         "vec3 viewDir = normalize(-vertPos);\n"
 #ifndef BLINN_PHONG
         "vec3 reflectDir = reflect(-lightDir, vertNorm);\n"
