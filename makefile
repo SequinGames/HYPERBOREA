@@ -62,4 +62,4 @@ clean:
 	rm -f $(name)_windows.exe
 	rm -f $(name)_bsd
 	rm -f $(name)_bsdsdl
-	rm -f $(name)_glfw
+	rm -f $(name)_linux
