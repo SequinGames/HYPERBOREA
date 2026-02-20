@@ -1346,7 +1346,7 @@ void main_loop()
             vAdd(&np, np, ld);
             mIdent(&model);
             static float lpx=0.f, lpy=0.f;
-            if(fabsf(lpx-px) > 0.03f || fabsf(lpy-py) > 0.03f)
+            if(fabsf(lpx-px) > 3.f*dt || fabsf(lpy-py) > 3.f*dt)
             {
                 mSetPos(&model, (vec){np.x, np.y, 0.1f+sinf(bob)*0.03f});
                 bob += dt*6.f;
