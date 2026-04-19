@@ -197,13 +197,10 @@ void esDebug(const GLuint state)
         const GLsizei stride = 9*sizeof(GLfloat);
         glBindBuffer(GL_ARRAY_BUFFER, esModelArray[id].vid);
         glVertexAttribPointer(position_id, 3, GL_FLOAT, GL_FALSE, stride, (GLvoid*)0);
-        glEnableVertexAttribArray(position_id);
         glBindBuffer(GL_ARRAY_BUFFER, esModelArray[id].vid);
         glVertexAttribPointer(normal_id, 3, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(3*sizeof(GLfloat)));
-        glEnableVertexAttribArray(normal_id);
         glBindBuffer(GL_ARRAY_BUFFER, esModelArray[id].vid);
         glVertexAttribPointer(color_id, 3, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(6*sizeof(GLfloat)));
-        glEnableVertexAttribArray(color_id);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, esModelArray[id].iid);
         esBoundModel = id;
     }
@@ -750,6 +747,8 @@ void makeFullbrightSolid()
         glAttachShader(shdFullbrightSolid, vertexShader);
         glAttachShader(shdFullbrightSolid, fragmentShader);
     glLinkProgram(shdFullbrightSolid);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
     if(debugShader(shdFullbrightSolid) == GL_FALSE){return;}
     shdFullbrightSolid_position = glGetAttribLocation(shdFullbrightSolid, "position");
     shdFullbrightSolid_projection = glGetUniformLocation(shdFullbrightSolid, "projection");
@@ -770,6 +769,8 @@ void makeFullbright()
         glAttachShader(shdFullbright, vertexShader);
         glAttachShader(shdFullbright, fragmentShader);
     glLinkProgram(shdFullbright);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
     if(debugShader(shdFullbright) == GL_FALSE){return;}
     shdFullbright_position = glGetAttribLocation(shdFullbright, "position");
     shdFullbright_color = glGetAttribLocation(shdFullbright, "color");
@@ -790,6 +791,8 @@ void makeLambertSolid()
         glAttachShader(shdLambertSolid, vertexShader);
         glAttachShader(shdLambertSolid, fragmentShader);
     glLinkProgram(shdLambertSolid);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
     if(debugShader(shdLambertSolid) == GL_FALSE){return;}
     shdLambertSolid_position = glGetAttribLocation(shdLambertSolid, "position");
     shdLambertSolid_normal = glGetAttribLocation(shdLambertSolid, "normal");
@@ -813,6 +816,8 @@ void makeLambert()
         glAttachShader(shdLambert, vertexShader);
         glAttachShader(shdLambert, fragmentShader);
     glLinkProgram(shdLambert);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
     if(debugShader(shdLambert) == GL_FALSE){return;}
     shdLambert_position = glGetAttribLocation(shdLambert, "position");
     shdLambert_normal = glGetAttribLocation(shdLambert, "normal");
@@ -836,6 +841,8 @@ void makePhong()
         glAttachShader(shdPhong, vertexShader);
         glAttachShader(shdPhong, fragmentShader);
     glLinkProgram(shdPhong);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
     if(debugShader(shdPhong) == GL_FALSE){return;}
     shdPhong_position = glGetAttribLocation(shdPhong, "position");
     shdPhong_normal = glGetAttribLocation(shdPhong, "normal");
@@ -867,6 +874,7 @@ void shadeFullbrightSolid(GLint* position, GLint* iprojection, GLint* imodelview
     *opacity = shdFullbrightSolid_opacity;
     *lightness = shdFullbrightSolid_lightness;
     glUseProgram(shdFullbrightSolid);
+    glEnableVertexAttribArray(position_id);
 }
 void shadeFullbright(GLint* position, GLint* iprojection, GLint* imodelview, GLint* color, GLint* lightness, GLint* opacity)
 {
@@ -877,6 +885,8 @@ void shadeFullbright(GLint* position, GLint* iprojection, GLint* imodelview, GLi
     *opacity = shdFullbright_opacity;
     *lightness = shdFullbright_lightness;
     glUseProgram(shdFullbright);
+    glEnableVertexAttribArray(position_id);
+    glEnableVertexAttribArray(color_id);
 }
 void shadeLambertSolid(GLint* position, GLint* iprojection, GLint* imodelview, GLint* lightpos, GLint* normal, GLint* color, GLint* ambient, GLint* saturate, GLint* opacity)
 {
@@ -890,6 +900,8 @@ void shadeLambertSolid(GLint* position, GLint* iprojection, GLint* imodelview, G
     *saturate = shdLambertSolid_saturate;
     *opacity = shdLambertSolid_opacity;
     glUseProgram(shdLambertSolid);
+    glEnableVertexAttribArray(position_id);
+    glEnableVertexAttribArray(normal_id);
 }
 void shadeLambert(GLint* position, GLint* iprojection, GLint* imodelview, GLint* lightpos, GLint* normal, GLint* color, GLint* ambient, GLint* saturate, GLint* opacity)
 {
@@ -903,6 +915,9 @@ void shadeLambert(GLint* position, GLint* iprojection, GLint* imodelview, GLint*
     *saturate = shdLambert_saturate;
     *opacity = shdLambert_opacity;
     glUseProgram(shdLambert);
+    glEnableVertexAttribArray(position_id);
+    glEnableVertexAttribArray(normal_id);
+    glEnableVertexAttribArray(color_id);
 }
 void shadePhong(GLint* position, GLint* iprojection, GLint* imodelview, GLint* lightpos, GLint* normal, GLint* color, GLint* ambient, GLint* specular, GLint* specpower, GLint* hsv, GLint* viewdist, GLint* opacity)
 {
@@ -919,6 +934,9 @@ void shadePhong(GLint* position, GLint* iprojection, GLint* imodelview, GLint* l
     *viewdist = shdPhong_viewdist;
     *opacity = shdPhong_opacity;
     glUseProgram(shdPhong);
+    glEnableVertexAttribArray(position_id);
+    glEnableVertexAttribArray(normal_id);
+    glEnableVertexAttribArray(color_id);
 }
 #include <math.h>
 #include <string.h>
