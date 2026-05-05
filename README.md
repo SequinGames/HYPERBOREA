@@ -22,8 +22,8 @@ The reason for this is that the greek mythology of
 Hyperborea is a noticable part of internet culture
 although sadly it has been highjacked by alt-right
 agendas to some degree - I hope that by making a game
-called Hyperborea that doesn't feed onto the perverted
-misrepresentation of the original greek mythology helps
+called Hyperborea that doesn't feed into the perverted
+misrepresentation of the original greek mythology, helps
 to aid decoupling it somewhat from lesser desirable
 ideological views.
 
