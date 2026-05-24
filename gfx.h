@@ -327,7 +327,7 @@ void esDebug(const GLuint state)
         esBind(GL_ARRAY_BUFFER, &esModelArray[id].vid, vertex_buffer, vbl, GL_STATIC_DRAW);
         esBind(GL_ELEMENT_ARRAY_BUFFER, &esModelArray[id].iid, index_buffer, ibl, GL_STATIC_DRAW);
 #ifdef TEST
-        printf("Loaded PLY: %u %u %u\n", id, vbl, ibl);
+        printf("Loaded VBO: %u %u %u\n", id, vbl, ibl);
 #endif
         return id;
     }
